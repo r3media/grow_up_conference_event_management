@@ -12,6 +12,7 @@ import { Settings } from './pages/Settings';
 import { CheckIn } from './pages/CheckIn';
 import { Communications } from './pages/Communications';
 import { Reports } from './pages/Reports';
+import { Tickets } from './pages/Tickets';
 import '@/App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -109,6 +110,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Reports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tickets"
+            element={
+              <ProtectedRoute>
+                <Tickets />
               </ProtectedRoute>
             }
           />
