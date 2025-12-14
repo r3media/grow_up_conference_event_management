@@ -553,6 +553,13 @@ async def update_badge_template(template_id: str, template: BadgeTemplateCreate,
     updated["created_at"] = datetime.fromisoformat(updated["created_at"])
     return BadgeTemplateResponse(**updated)
 
+@api_router.delete("/badge-templates/{template_id}")
+async def delete_badge_template(template_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.badge_templates.delete_one({"template_id": template_id, "tenant_id": current_user["tenant_id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return {"message": "Badge template deleted successfully"}
+
 # ===== BADGE PDF GENERATION =====
 
 @api_router.get("/badges/print/{contact_id}")
