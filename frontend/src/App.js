@@ -9,6 +9,9 @@ import { Events } from './pages/Events';
 import { Contacts } from './pages/Contacts';
 import { Orders } from './pages/Orders';
 import { Settings } from './pages/Settings';
+import { CheckIn } from './pages/CheckIn';
+import { Communications } from './pages/Communications';
+import { Reports } from './pages/Reports';
 import '@/App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -82,6 +85,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/checkin"
+            element={
+              <ProtectedRoute>
+                <CheckIn />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/communications"
+            element={
+              <ProtectedRoute>
+                <Communications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <Reports />
               </ProtectedRoute>
             }
           />
