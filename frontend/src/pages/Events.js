@@ -133,7 +133,7 @@ export const Events = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full" data-testid="submit-event-button">
-                  Create Event
+                  {editingEvent ? 'Update Event' : 'Create Event'}
                 </Button>
               </form>
             </DialogContent>
@@ -154,7 +154,27 @@ export const Events = () => {
                 data-testid={`event-card-${event.event_id}`}
                 className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-200"
               >
-                <h3 className="text-xl font-semibold text-slate-900 mb-3">{event.name}</h3>
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="text-xl font-semibold text-slate-900 flex-1">{event.name}</h3>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={() => handleEdit(event)}
+                      data-testid={`edit-event-${event.event_id}`}
+                      variant="ghost"
+                      size="sm"
+                    >
+                      <Edit size={16} />
+                    </Button>
+                    <Button
+                      onClick={() => handleDelete(event.event_id)}
+                      data-testid={`delete-event-${event.event_id}`}
+                      variant="ghost"
+                      size="sm"
+                    >
+                      <Trash2 size={16} className="text-red-500" />
+                    </Button>
+                  </div>
+                </div>
                 <div className="space-y-2 text-sm text-slate-600">
                   <div className="flex items-center">
                     <MapPin size={16} className="mr-2 text-slate-400" />
