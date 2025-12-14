@@ -470,19 +470,24 @@ export const BadgeDesigner = () => {
                   left: `${element.x}px`,
                   top: `${element.y}px`,
                   width: `${element.width}px`,
-                  height: `${element.height}px`,
-                  fontSize: `${element.fontSize}px`,
-                  fontFamily: element.fontFamily,
-                  fontWeight: element.fontWeight,
-                  fontStyle: element.fontStyle || 'normal',
-                  color: element.color,
-                  textAlign: element.align
+                  height: `${element.height}px`
                 }}
               >
                 {element.type === 'qrcode' ? (
                   renderElementContent(element)
                 ) : (
-                  <div className="w-full h-full flex items-center px-2">
+                  <div 
+                    className="w-full h-full flex items-center px-2"
+                    style={{
+                      fontSize: `${element.fontSize}px`,
+                      fontFamily: element.fontFamily,
+                      fontWeight: element.fontWeight,
+                      fontStyle: element.fontStyle || 'normal',
+                      color: element.color,
+                      textAlign: element.align,
+                      justifyContent: element.align === 'center' ? 'center' : element.align === 'right' ? 'flex-end' : 'flex-start'
+                    }}
+                  >
                     {renderElementContent(element)}
                   </div>
                 )}
