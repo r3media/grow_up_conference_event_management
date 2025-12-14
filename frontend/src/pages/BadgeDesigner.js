@@ -206,7 +206,31 @@ export const BadgeDesigner = () => {
 
   return (
     <Layout>
-      <div data-testid="badge-designer-container" className="h-[calc(100vh-180px)] flex gap-6">
+      <div className="space-y-6">
+        {/* Event Selection Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-slate-900">Badge Designer</h2>
+            <p className="text-slate-600 mt-1">Design custom badges for your event</p>
+          </div>
+          <div className="w-80">
+            <Label className="text-xs mb-1 block">Select Event</Label>
+            <Select value={selectedEvent} onValueChange={setSelectedEvent}>
+              <SelectTrigger data-testid="event-select-header">
+                <SelectValue placeholder="Select event" />
+              </SelectTrigger>
+              <SelectContent>
+                {events.map(event => (
+                  <SelectItem key={event.event_id} value={event.event_id}>
+                    {event.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div data-testid="badge-designer-container" className="h-[calc(100vh-280px)] flex gap-6">
         {/* Left Sidebar - Tools */}
         <div className="w-64 bg-white rounded-xl border border-slate-200 p-6 space-y-6 overflow-y-auto">
           <div>
