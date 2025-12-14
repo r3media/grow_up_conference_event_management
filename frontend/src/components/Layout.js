@@ -26,6 +26,7 @@ export const Layout = ({ children }) => {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Events', href: '/events', icon: Calendar },
+    { name: 'Tickets', href: '/tickets', icon: CreditCard },
     { name: 'Contacts', href: '/contacts', icon: Users },
     { name: 'Badge Designer', href: '/badge-designer', icon: IdCard },
     { name: 'Orders', href: '/orders', icon: CreditCard },
