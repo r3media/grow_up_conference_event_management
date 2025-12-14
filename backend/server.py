@@ -455,6 +455,41 @@ async def get_contact(contact_id: str, current_user: dict = Depends(get_current_
     contact["created_at"] = datetime.fromisoformat(contact["created_at"])
     return ContactResponse(**contact)
 
+@api_router.put("/contacts/{contact_id}", response_model=ContactResponse)
+async def update_contact(contact_id: str, contact: ContactCreate, current_user: dict = Depends(get_current_user)):
+    existing = await db.contacts.find_one({"contact_id": contact_id, "tenant_id": current_user["tenant_id"]}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    
+    update_doc = {
+        "event_id": contact.event_id,
+        "type": contact.type,
+        "name": contact.name,
+        "email": contact.email,
+        "company": contact.company,
+        "title": contact.title,
+        "phone": contact.phone,
+        "booth_number": contact.booth_number,
+        "ticket_type": contact.ticket_type,
+        "custom_data": contact.custom_data or {}
+    }
+    
+    await db.contacts.update_one(
+        {"contact_id": contact_id, "tenant_id": current_user["tenant_id"]},
+        {"$set": update_doc}
+    )
+    
+    updated = await db.contacts.find_one({"contact_id": contact_id}, {"_id": 0})
+    updated["created_at"] = datetime.fromisoformat(updated["created_at"])
+    return ContactResponse(**updated)
+
+@api_router.delete("/contacts/{contact_id}")
+async def delete_contact(contact_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.contacts.delete_one({"contact_id": contact_id, "tenant_id": current_user["tenant_id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    return {"message": "Contact deleted successfully"}
+
 # ===== BADGE TEMPLATES =====
 
 @api_router.post("/badge-templates", response_model=BadgeTemplateResponse)
