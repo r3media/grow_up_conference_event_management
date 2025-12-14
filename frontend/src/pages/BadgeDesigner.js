@@ -284,29 +284,80 @@ export const BadgeDesigner = () => {
                 onClick={() => addElement('text')}
                 data-testid="add-text-button"
                 variant="secondary"
-                className="w-full justify-start"
+                className="w-full justify-start text-sm"
               >
                 <Type size={16} className="mr-2" />
-                Text
-              </Button>
-              <Button
-                onClick={() => addElement('field')}
-                data-testid="add-field-button"
-                variant="secondary"
-                className="w-full justify-start"
-              >
-                <Plus size={16} className="mr-2" />
-                Field
+                Custom Text
               </Button>
               <Button
                 onClick={() => addElement('qrcode')}
                 data-testid="add-qrcode-button"
                 variant="secondary"
-                className="w-full justify-start"
+                className="w-full justify-start text-sm"
               >
                 <QrCode size={16} className="mr-2" />
                 QR Code
               </Button>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-slate-900 mb-3 text-xs uppercase tracking-wider text-slate-600">Popular Fields</h3>
+            <div className="space-y-1">
+              <button
+                onClick={() => addFieldElement('first_name', 'First Name')}
+                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                First Name
+              </button>
+              <button
+                onClick={() => addFieldElement('last_name', 'Last Name')}
+                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                Last Name
+              </button>
+              <button
+                onClick={() => addFieldElement('company', 'Company Name')}
+                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-indigo-50 bg-indigo-50 text-indigo-700 font-medium transition-colors"
+              >
+                Company Name
+              </button>
+              <button
+                onClick={() => addFieldElement('title', 'Job Title')}
+                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                Job Title
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-slate-900 mb-3 text-xs uppercase tracking-wider text-slate-600">Other Fields</h3>
+            <div className="space-y-1">
+              <button
+                onClick={() => addFieldElement('name', 'Full Name')}
+                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                Full Name
+              </button>
+              <button
+                onClick={() => addFieldElement('type', 'Type')}
+                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                Participant Type
+              </button>
+              <button
+                onClick={() => addFieldElement('booth_number', 'Booth #')}
+                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                Booth Number
+              </button>
+              <button
+                onClick={() => addFieldElement('email', 'Email')}
+                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                Email
+              </button>
             </div>
           </div>
 
