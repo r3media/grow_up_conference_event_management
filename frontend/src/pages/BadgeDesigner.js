@@ -94,6 +94,29 @@ export const BadgeDesigner = () => {
     toast.success(`${type} element added`);
   };
 
+  const addFieldElement = (fieldName, displayName) => {
+    // Stagger elements so they don't overlap
+    const offset = elements.length * 20;
+    const newElement = {
+      id: `element-${Date.now()}`,
+      type: 'field',
+      content: fieldName,
+      x: 50 + offset,
+      y: 50 + offset,
+      width: 200,
+      height: 40,
+      fontSize: 16,
+      fontFamily: 'Helvetica',
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+      color: '#000000',
+      align: 'left'
+    };
+    setElements([...elements, newElement]);
+    setSelectedElement(newElement.id);
+    toast.success(`${displayName} field added`);
+  };
+
   const updateElement = (id, updates) => {
     setElements(elements.map(el => el.id === id ? { ...el, ...updates } : el));
   };
