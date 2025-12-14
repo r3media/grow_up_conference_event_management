@@ -85,6 +85,7 @@ export const BadgeDesigner = () => {
       fontSize: type === 'qrcode' ? 12 : 16,
       fontFamily: 'Helvetica',
       fontWeight: 'normal',
+      fontStyle: 'normal',
       color: '#000000',
       align: 'left'
     };
@@ -158,6 +159,7 @@ export const BadgeDesigner = () => {
           fontSize: el.fontSize,
           fontFamily: el.fontFamily,
           fontWeight: el.fontWeight,
+          fontStyle: el.fontStyle || 'normal',
           color: el.color,
           align: el.align
         })),
@@ -350,6 +352,7 @@ export const BadgeDesigner = () => {
                   fontSize: `${element.fontSize}px`,
                   fontFamily: element.fontFamily,
                   fontWeight: element.fontWeight,
+                  fontStyle: element.fontStyle || 'normal',
                   color: element.color,
                   textAlign: element.align
                 }}
@@ -443,6 +446,39 @@ export const BadgeDesigner = () => {
                           <SelectItem value="Helvetica">Helvetica</SelectItem>
                           <SelectItem value="Times-Roman">Times Roman</SelectItem>
                           <SelectItem value="Courier">Courier</SelectItem>
+                          <SelectItem value="Arial">Arial</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs">Font Weight</Label>
+                      <Select
+                        value={selected.fontWeight}
+                        onValueChange={(value) => updateElement(selected.id, { fontWeight: value })}
+                      >
+                        <SelectTrigger data-testid="font-weight-select" className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="normal">Normal</SelectItem>
+                          <SelectItem value="bold">Bold</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs">Font Style</Label>
+                      <Select
+                        value={selected.fontStyle || 'normal'}
+                        onValueChange={(value) => updateElement(selected.id, { fontStyle: value })}
+                      >
+                        <SelectTrigger data-testid="font-style-select" className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="normal">Normal</SelectItem>
+                          <SelectItem value="italic">Italic</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
