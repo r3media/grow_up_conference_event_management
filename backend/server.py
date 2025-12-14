@@ -274,9 +274,9 @@ async def register(user_data: UserCreate):
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    # Create tenant if super_admin and no tenant_id
+    # Create tenant if no tenant_id provided (new organization registration)
     tenant_id = user_data.tenant_id
-    if user_data.role == "super_admin" and not tenant_id:
+    if not tenant_id:
         tenant_id = str(uuid.uuid4())
         tenant_doc = {
             "tenant_id": tenant_id,
@@ -284,9 +284,6 @@ async def register(user_data: UserCreate):
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.tenants.insert_one(tenant_doc)
-    
-    if not tenant_id:
-        raise HTTPException(status_code=400, detail="tenant_id required for non-super_admin users")
     
     user_id = str(uuid.uuid4())
     hashed_password = get_password_hash(user_data.password)
