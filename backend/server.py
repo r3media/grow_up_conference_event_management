@@ -794,6 +794,94 @@ async def get_order_status(order_id: str, current_user: dict = Depends(get_curre
         "currency": checkout_status.currency
     }
 
+# ===== TICKETS =====
+
+@api_router.post("/tickets", response_model=TicketResponse)
+async def create_ticket(ticket: TicketCreate, current_user: dict = Depends(get_current_user)):
+    # Verify event belongs to tenant
+    event = await db.events.find_one({"event_id": ticket.event_id, "tenant_id": current_user["tenant_id"]}, {"_id": 0})
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    ticket_id = str(uuid.uuid4())
+    ticket_doc = {
+        "ticket_id": ticket_id,
+        "tenant_id": current_user["tenant_id"],
+        "event_id": ticket.event_id,
+        "name": ticket.name,
+        "description": ticket.description,
+        "price": ticket.price,
+        "currency": ticket.currency,
+        "quantity": ticket.quantity,
+        "sold": ticket.sold,
+        "available": ticket.quantity - ticket.sold if ticket.quantity else None,
+        "start_sale": ticket.start_sale,
+        "end_sale": ticket.end_sale,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.tickets.insert_one(ticket_doc)
+    ticket_doc["created_at"] = datetime.fromisoformat(ticket_doc["created_at"])
+    return TicketResponse(**ticket_doc)
+
+@api_router.get("/tickets", response_model=List[TicketResponse])
+async def get_tickets(event_id: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    query = {"tenant_id": current_user["tenant_id"]}
+    if event_id:
+        query["event_id"] = event_id
+    
+    tickets = await db.tickets.find(query, {"_id": 0}).to_list(1000)
+    for ticket in tickets:
+        ticket["created_at"] = datetime.fromisoformat(ticket["created_at"])
+        if ticket.get("quantity"):
+            ticket["available"] = ticket["quantity"] - ticket.get("sold", 0)
+    return [TicketResponse(**t) for t in tickets]
+
+@api_router.get("/tickets/{ticket_id}", response_model=TicketResponse)
+async def get_ticket(ticket_id: str, current_user: dict = Depends(get_current_user)):
+    ticket = await db.tickets.find_one({"ticket_id": ticket_id, "tenant_id": current_user["tenant_id"]}, {"_id": 0})
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    ticket["created_at"] = datetime.fromisoformat(ticket["created_at"])
+    if ticket.get("quantity"):
+        ticket["available"] = ticket["quantity"] - ticket.get("sold", 0)
+    return TicketResponse(**ticket)
+
+@api_router.put("/tickets/{ticket_id}", response_model=TicketResponse)
+async def update_ticket(ticket_id: str, ticket: TicketCreate, current_user: dict = Depends(get_current_user)):
+    existing = await db.tickets.find_one({"ticket_id": ticket_id, "tenant_id": current_user["tenant_id"]}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    
+    update_doc = {
+        "name": ticket.name,
+        "description": ticket.description,
+        "price": ticket.price,
+        "currency": ticket.currency,
+        "quantity": ticket.quantity,
+        "start_sale": ticket.start_sale,
+        "end_sale": ticket.end_sale,
+        "available": ticket.quantity - existing.get("sold", 0) if ticket.quantity else None
+    }
+    
+    await db.tickets.update_one(
+        {"ticket_id": ticket_id, "tenant_id": current_user["tenant_id"]},
+        {"$set": update_doc}
+    )
+    
+    updated = await db.tickets.find_one({"ticket_id": ticket_id}, {"_id": 0})
+    updated["created_at"] = datetime.fromisoformat(updated["created_at"])
+    if updated.get("quantity"):
+        updated["available"] = updated["quantity"] - updated.get("sold", 0)
+    return TicketResponse(**updated)
+
+@api_router.delete("/tickets/{ticket_id}")
+async def delete_ticket(ticket_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.tickets.delete_one({"ticket_id": ticket_id, "tenant_id": current_user["tenant_id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    return {"message": "Ticket deleted successfully"}
+
 @api_router.post("/webhook/stripe")
 async def stripe_webhook(request: Request):
     body = await request.body()
