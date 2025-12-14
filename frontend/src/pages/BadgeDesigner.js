@@ -1,0 +1,466 @@
+import { useState, useEffect } from 'react';
+import { Layout } from '../components/Layout';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { toast } from 'sonner';
+import axios from 'axios';
+import Draggable from 'react-draggable';
+import { Plus, Type, QrCode, Image as ImageIcon, Save, Download, Trash2 } from 'lucide-react';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+const BADGE_WIDTH = 4; // inches
+const BADGE_HEIGHT = 6; // inches
+const SCALE = 96; // pixels per inch (DPI)
+
+export const BadgeDesigner = () => {
+  const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState('');
+  const [templateName, setTemplateName] = useState('Default Badge');
+  const [elements, setElements] = useState([]);
+  const [selectedElement, setSelectedElement] = useState(null);
+  const [templates, setTemplates] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [previewContact, setPreviewContact] = useState(null);
+
+  useEffect(() => {
+    fetchEvents();
+    fetchTemplates();
+  }, []);
+
+  useEffect(() => {
+    if (selectedEvent) {
+      fetchContacts(selectedEvent);
+    }
+  }, [selectedEvent]);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get(`${API}/events`);
+      setEvents(response.data);
+      if (response.data.length > 0) {
+        setSelectedEvent(response.data[0].event_id);
+      }
+    } catch (error) {
+      console.error('Failed to fetch events:', error);
+      toast.error('Failed to load events');
+    }
+  };
+
+  const fetchTemplates = async () => {
+    try {
+      const response = await axios.get(`${API}/badge-templates`);
+      setTemplates(response.data);
+    } catch (error) {
+      console.error('Failed to fetch templates:', error);
+    }
+  };
+
+  const fetchContacts = async (eventId) => {
+    try {
+      const response = await axios.get(`${API}/contacts?event_id=${eventId}`);
+      setContacts(response.data);
+      if (response.data.length > 0) {
+        setPreviewContact(response.data[0]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch contacts:', error);
+    }
+  };
+
+  const addElement = (type) => {
+    const newElement = {
+      id: `element-${Date.now()}`,
+      type,
+      content: type === 'text' ? 'Sample Text' : type === 'field' ? 'name' : type === 'qrcode' ? 'QR Code' : '',
+      x: 50,
+      y: 50,
+      width: type === 'qrcode' ? 100 : 200,
+      height: type === 'qrcode' ? 100 : 40,
+      fontSize: 16,
+      fontFamily: 'Helvetica',
+      fontWeight: 'normal',
+      color: '#000000',
+      align: 'left'
+    };
+    setElements([...elements, newElement]);
+    setSelectedElement(newElement.id);
+    toast.success(`${type} element added`);
+  };
+
+  const updateElement = (id, updates) => {
+    setElements(elements.map(el => el.id === id ? { ...el, ...updates } : el));
+  };
+
+  const deleteElement = (id) => {
+    setElements(elements.filter(el => el.id !== id));
+    setSelectedElement(null);
+    toast.success('Element deleted');
+  };
+
+  const handleDrag = (id, e, data) => {
+    updateElement(id, { x: data.x, y: data.y });
+  };
+
+  const saveTemplate = async () => {
+    if (!selectedEvent) {
+      toast.error('Please select an event');
+      return;
+    }
+
+    try {
+      await axios.post(`${API}/badge-templates`, {
+        event_id: selectedEvent,
+        name: templateName,
+        width: BADGE_WIDTH,
+        height: BADGE_HEIGHT,
+        elements: elements.map(el => ({
+          id: el.id,
+          type: el.type,
+          content: el.content,
+          x: el.x,
+          y: el.y,
+          width: el.width,
+          height: el.height,
+          fontSize: el.fontSize,
+          fontFamily: el.fontFamily,
+          fontWeight: el.fontWeight,
+          color: el.color,
+          align: el.align
+        })),
+        is_default: false
+      });
+      toast.success('Template saved successfully!');
+      fetchTemplates();
+    } catch (error) {
+      console.error('Failed to save template:', error);
+      toast.error('Failed to save template');
+    }
+  };
+
+  const loadTemplate = async (templateId) => {
+    try {
+      const response = await axios.get(`${API}/badge-templates/${templateId}`);
+      const template = response.data;
+      setTemplateName(template.name);
+      setSelectedEvent(template.event_id);
+      setElements(template.elements);
+      toast.success('Template loaded');
+    } catch (error) {
+      console.error('Failed to load template:', error);
+      toast.error('Failed to load template');
+    }
+  };
+
+  const renderElementContent = (element) => {
+    if (element.type === 'text') {
+      return element.content;
+    } else if (element.type === 'field') {
+      return previewContact ? previewContact[element.content] || `{${element.content}}` : `{${element.content}}`;
+    } else if (element.type === 'qrcode') {
+      return previewContact?.qr_code ? (
+        <img src={previewContact.qr_code} alt="QR Code" className="w-full h-full object-contain" />
+      ) : (
+        <div className="w-full h-full bg-slate-200 flex items-center justify-center text-xs text-slate-500">QR</div>
+      );
+    }
+    return element.content;
+  };
+
+  const selected = elements.find(el => el.id === selectedElement);
+
+  return (
+    <Layout>
+      <div data-testid="badge-designer-container" className="h-[calc(100vh-180px)] flex gap-6">
+        {/* Left Sidebar - Tools */}
+        <div className="w-64 bg-white rounded-xl border border-slate-200 p-6 space-y-6 overflow-y-auto">
+          <div>
+            <h3 className="font-semibold text-slate-900 mb-4">Badge Details</h3>
+            <div className="space-y-3">
+              <div>
+                <Label className="text-xs">Template Name</Label>
+                <Input
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  data-testid="template-name-input"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Event</Label>
+                <Select value={selectedEvent} onValueChange={setSelectedEvent}>
+                  <SelectTrigger data-testid="event-select" className="mt-1">
+                    <SelectValue placeholder="Select event" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {events.map(event => (
+                      <SelectItem key={event.event_id} value={event.event_id}>
+                        {event.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-slate-900 mb-4">Add Elements</h3>
+            <div className="space-y-2">
+              <Button
+                onClick={() => addElement('text')}
+                data-testid="add-text-button"
+                variant="secondary"
+                className="w-full justify-start"
+              >
+                <Type size={16} className="mr-2" />
+                Text
+              </Button>
+              <Button
+                onClick={() => addElement('field')}
+                data-testid="add-field-button"
+                variant="secondary"
+                className="w-full justify-start"
+              >
+                <Plus size={16} className="mr-2" />
+                Field
+              </Button>
+              <Button
+                onClick={() => addElement('qrcode')}
+                data-testid="add-qrcode-button"
+                variant="secondary"
+                className="w-full justify-start"
+              >
+                <QrCode size={16} className="mr-2" />
+                QR Code
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-slate-900 mb-4">Actions</h3>
+            <div className="space-y-2">
+              <Button
+                onClick={saveTemplate}
+                data-testid="save-template-button"
+                className="w-full justify-start"
+              >
+                <Save size={16} className="mr-2" />
+                Save Template
+              </Button>
+            </div>
+          </div>
+
+          {templates.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-slate-900 mb-4">Load Template</h3>
+              <Select onValueChange={loadTemplate}>
+                <SelectTrigger data-testid="load-template-select">
+                  <SelectValue placeholder="Choose template" />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates.map(template => (
+                    <SelectItem key={template.template_id} value={template.template_id}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {contacts.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-slate-900 mb-4">Preview Contact</h3>
+              <Select value={previewContact?.contact_id} onValueChange={(id) => setPreviewContact(contacts.find(c => c.contact_id === id))}>
+                <SelectTrigger data-testid="preview-contact-select">
+                  <SelectValue placeholder="Choose contact" />
+                </SelectTrigger>
+                <SelectContent>
+                  {contacts.map(contact => (
+                    <SelectItem key={contact.contact_id} value={contact.contact_id}>
+                      {contact.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+
+        {/* Center - Canvas */}
+        <div className="flex-1 bg-slate-100 rounded-xl p-12 flex items-center justify-center overflow-auto">
+          <div
+            data-testid="badge-canvas"
+            className="bg-white shadow-2xl border border-slate-200 relative"
+            style={{
+              width: `${BADGE_WIDTH * SCALE}px`,
+              height: `${BADGE_HEIGHT * SCALE}px`
+            }}
+          >
+            {elements.map((element) => (
+              <Draggable
+                key={element.id}
+                position={{ x: element.x, y: element.y }}
+                onStop={(e, data) => handleDrag(element.id, e, data)}
+                bounds="parent"
+              >
+                <div
+                  data-testid={`badge-element-${element.id}`}
+                  onClick={() => setSelectedElement(element.id)}
+                  className={`absolute cursor-move ${
+                    selectedElement === element.id ? 'ring-2 ring-primary' : ''
+                  }`}
+                  style={{
+                    width: `${element.width}px`,
+                    height: `${element.height}px`,
+                    fontSize: `${element.fontSize}px`,
+                    fontFamily: element.fontFamily,
+                    fontWeight: element.fontWeight,
+                    color: element.color,
+                    textAlign: element.align
+                  }}
+                >
+                  {element.type === 'qrcode' ? (
+                    renderElementContent(element)
+                  ) : (
+                    <div className="w-full h-full flex items-center">
+                      {renderElementContent(element)}
+                    </div>
+                  )}
+                </div>
+              </Draggable>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Sidebar - Properties */}
+        <div className="w-80 bg-white rounded-xl border border-slate-200 p-6 space-y-6 overflow-y-auto">
+          {selected ? (
+            <>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-slate-900">Properties</h3>
+                <Button
+                  onClick={() => deleteElement(selected.id)}
+                  data-testid="delete-element-button"
+                  variant="destructive"
+                  size="sm"
+                >
+                  <Trash2 size={16} />
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {selected.type === 'text' && (
+                  <div>
+                    <Label className="text-xs">Text Content</Label>
+                    <Input
+                      value={selected.content}
+                      onChange={(e) => updateElement(selected.id, { content: e.target.value })}
+                      data-testid="element-content-input"
+                      className="mt-1"
+                    />
+                  </div>
+                )}
+
+                {selected.type === 'field' && (
+                  <div>
+                    <Label className="text-xs">Field Name</Label>
+                    <Select
+                      value={selected.content}
+                      onValueChange={(value) => updateElement(selected.id, { content: value })}
+                    >
+                      <SelectTrigger data-testid="field-name-select" className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="name">Name</SelectItem>
+                        <SelectItem value="company">Company</SelectItem>
+                        <SelectItem value="title">Title</SelectItem>
+                        <SelectItem value="type">Type</SelectItem>
+                        <SelectItem value="booth_number">Booth Number</SelectItem>
+                        <SelectItem value="ticket_type">Ticket Type</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {selected.type !== 'qrcode' && (
+                  <>
+                    <div>
+                      <Label className="text-xs">Font Size</Label>
+                      <Input
+                        type="number"
+                        value={selected.fontSize}
+                        onChange={(e) => updateElement(selected.id, { fontSize: parseInt(e.target.value) })}
+                        data-testid="font-size-input"
+                        className="mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-xs">Font Family</Label>
+                      <Select
+                        value={selected.fontFamily}
+                        onValueChange={(value) => updateElement(selected.id, { fontFamily: value })}
+                      >
+                        <SelectTrigger data-testid="font-family-select" className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Helvetica">Helvetica</SelectItem>
+                          <SelectItem value="Times-Roman">Times Roman</SelectItem>
+                          <SelectItem value="Courier">Courier</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs">Color</Label>
+                      <Input
+                        type="color"
+                        value={selected.color}
+                        onChange={(e) => updateElement(selected.id, { color: e.target.value })}
+                        data-testid="color-input"
+                        className="mt-1 h-10"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div>
+                  <Label className="text-xs">Width</Label>
+                  <Input
+                    type="number"
+                    value={selected.width}
+                    onChange={(e) => updateElement(selected.id, { width: parseInt(e.target.value) })}
+                    data-testid="width-input"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-xs">Height</Label>
+                  <Input
+                    type="number"
+                    value={selected.height}
+                    onChange={(e) => updateElement(selected.id, { height: parseInt(e.target.value) })}
+                    data-testid="height-input"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center text-slate-500 py-12">
+              <p>Select an element to edit its properties</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </Layout>
+  );
+};
