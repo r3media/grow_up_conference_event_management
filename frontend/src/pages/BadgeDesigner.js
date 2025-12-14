@@ -72,15 +72,17 @@ export const BadgeDesigner = () => {
   };
 
   const addElement = (type) => {
+    // Stagger elements so they don't overlap
+    const offset = elements.length * 20;
     const newElement = {
       id: `element-${Date.now()}`,
       type,
       content: type === 'text' ? 'Sample Text' : type === 'field' ? 'name' : type === 'qrcode' ? 'QR Code' : '',
-      x: 50,
-      y: 50,
+      x: 50 + offset,
+      y: 50 + offset,
       width: type === 'qrcode' ? 100 : 200,
       height: type === 'qrcode' ? 100 : 40,
-      fontSize: 16,
+      fontSize: type === 'qrcode' ? 12 : 16,
       fontFamily: 'Helvetica',
       fontWeight: 'normal',
       color: '#000000',
@@ -335,8 +337,10 @@ export const BadgeDesigner = () => {
                 data-testid={`badge-element-${element.id}`}
                 onClick={() => setSelectedElement(element.id)}
                 onMouseDown={(e) => handleMouseDown(element.id, e)}
-                className={`absolute cursor-move ${
-                  selectedElement === element.id ? 'ring-2 ring-primary' : ''
+                className={`absolute cursor-move border transition-all ${
+                  selectedElement === element.id 
+                    ? 'ring-2 ring-primary border-primary bg-blue-50/50' 
+                    : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50/30'
                 }`}
                 style={{
                   left: `${element.x}px`,
@@ -353,7 +357,7 @@ export const BadgeDesigner = () => {
                 {element.type === 'qrcode' ? (
                   renderElementContent(element)
                 ) : (
-                  <div className="w-full h-full flex items-center">
+                  <div className="w-full h-full flex items-center px-2">
                     {renderElementContent(element)}
                   </div>
                 )}
