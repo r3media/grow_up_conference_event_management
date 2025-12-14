@@ -6,7 +6,7 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { toast } from 'sonner';
 import axios from 'axios';
-import Draggable from 'react-draggable';
+import { useRef } from 'react';
 import { Plus, Type, QrCode, Image as ImageIcon, Save, Download, Trash2 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -101,8 +101,36 @@ export const BadgeDesigner = () => {
     toast.success('Element deleted');
   };
 
-  const handleDrag = (id, e, data) => {
-    updateElement(id, { x: data.x, y: data.y });
+  const handleMouseDown = (id, e) => {
+    if (e.button !== 0) return; // Only left click
+    
+    const element = elements.find(el => el.id === id);
+    if (!element) return;
+    
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startElementX = element.x;
+    const startElementY = element.y;
+    
+    const handleMouseMove = (moveEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+      
+      updateElement(id, {
+        x: Math.max(0, Math.min(BADGE_WIDTH * SCALE - element.width, startElementX + deltaX)),
+        y: Math.max(0, Math.min(BADGE_HEIGHT * SCALE - element.height, startElementY + deltaY))
+      });
+    };
+    
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    e.preventDefault();
   };
 
   const saveTemplate = async () => {
@@ -302,37 +330,34 @@ export const BadgeDesigner = () => {
             }}
           >
             {elements.map((element) => (
-              <Draggable
+              <div
                 key={element.id}
-                position={{ x: element.x, y: element.y }}
-                onStop={(e, data) => handleDrag(element.id, e, data)}
-                bounds="parent"
+                data-testid={`badge-element-${element.id}`}
+                onClick={() => setSelectedElement(element.id)}
+                onMouseDown={(e) => handleMouseDown(element.id, e)}
+                className={`absolute cursor-move ${
+                  selectedElement === element.id ? 'ring-2 ring-primary' : ''
+                }`}
+                style={{
+                  left: `${element.x}px`,
+                  top: `${element.y}px`,
+                  width: `${element.width}px`,
+                  height: `${element.height}px`,
+                  fontSize: `${element.fontSize}px`,
+                  fontFamily: element.fontFamily,
+                  fontWeight: element.fontWeight,
+                  color: element.color,
+                  textAlign: element.align
+                }}
               >
-                <div
-                  data-testid={`badge-element-${element.id}`}
-                  onClick={() => setSelectedElement(element.id)}
-                  className={`absolute cursor-move ${
-                    selectedElement === element.id ? 'ring-2 ring-primary' : ''
-                  }`}
-                  style={{
-                    width: `${element.width}px`,
-                    height: `${element.height}px`,
-                    fontSize: `${element.fontSize}px`,
-                    fontFamily: element.fontFamily,
-                    fontWeight: element.fontWeight,
-                    color: element.color,
-                    textAlign: element.align
-                  }}
-                >
-                  {element.type === 'qrcode' ? (
-                    renderElementContent(element)
-                  ) : (
-                    <div className="w-full h-full flex items-center">
-                      {renderElementContent(element)}
-                    </div>
-                  )}
-                </div>
-              </Draggable>
+                {element.type === 'qrcode' ? (
+                  renderElementContent(element)
+                ) : (
+                  <div className="w-full h-full flex items-center">
+                    {renderElementContent(element)}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
