@@ -340,6 +340,7 @@ async def create_event(event: EventCreate, current_user: dict = Depends(get_curr
     event_doc = {
         "event_id": event_id,
         "tenant_id": current_user["tenant_id"],
+        "user_id": current_user["user_id"],
         "name": event.name,
         "dates": event.dates,
         "venue": event.venue,
@@ -365,6 +366,35 @@ async def get_event(event_id: str, current_user: dict = Depends(get_current_user
         raise HTTPException(status_code=404, detail="Event not found")
     event["created_at"] = datetime.fromisoformat(event["created_at"])
     return EventResponse(**event)
+
+@api_router.put("/events/{event_id}", response_model=EventResponse)
+async def update_event(event_id: str, event: EventCreate, current_user: dict = Depends(get_current_user)):
+    existing = await db.events.find_one({"event_id": event_id, "tenant_id": current_user["tenant_id"]}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    update_doc = {
+        "name": event.name,
+        "dates": event.dates,
+        "venue": event.venue,
+        "description": event.description
+    }
+    
+    await db.events.update_one(
+        {"event_id": event_id, "tenant_id": current_user["tenant_id"]},
+        {"$set": update_doc}
+    )
+    
+    updated = await db.events.find_one({"event_id": event_id}, {"_id": 0})
+    updated["created_at"] = datetime.fromisoformat(updated["created_at"])
+    return EventResponse(**updated)
+
+@api_router.delete("/events/{event_id}")
+async def delete_event(event_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.events.delete_one({"event_id": event_id, "tenant_id": current_user["tenant_id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return {"message": "Event deleted successfully"}
 
 # ===== CONTACTS =====
 
