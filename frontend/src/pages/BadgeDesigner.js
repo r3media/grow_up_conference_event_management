@@ -550,6 +550,7 @@ export const BadgeDesigner = () => {
           )}
         </div>
       </div>
+      </div>
     </Layout>
   );
 };
