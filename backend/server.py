@@ -176,6 +176,33 @@ class OrderResponse(BaseModel):
     stripe_session_id: Optional[str] = None
     created_at: datetime
 
+class TicketCreate(BaseModel):
+    event_id: str
+    name: str
+    description: Optional[str] = None
+    price: float
+    currency: str = "usd"
+    quantity: Optional[int] = None  # None = unlimited
+    sold: int = 0
+    start_sale: Optional[str] = None
+    end_sale: Optional[str] = None
+
+class TicketResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    ticket_id: str
+    tenant_id: str
+    event_id: str
+    name: str
+    description: Optional[str] = None
+    price: float
+    currency: str
+    quantity: Optional[int] = None
+    sold: int
+    available: Optional[int] = None
+    start_sale: Optional[str] = None
+    end_sale: Optional[str] = None
+    created_at: datetime
+
 # ===== AUTH UTILITIES =====
 
 def verify_password(plain_password, hashed_password):
