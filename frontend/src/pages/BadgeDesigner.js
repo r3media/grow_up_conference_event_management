@@ -191,7 +191,21 @@ export const BadgeDesigner = () => {
     if (element.type === 'text') {
       return element.content;
     } else if (element.type === 'field') {
-      return previewContact ? previewContact[element.content] || `{${element.content}}` : `{${element.content}}`;
+      if (!previewContact) {
+        return `{${element.content}}`;
+      }
+      
+      // Handle special field mappings
+      if (element.content === 'first_name') {
+        const fullName = previewContact.name || '';
+        return fullName.split(' ')[0] || '{first_name}';
+      } else if (element.content === 'last_name') {
+        const fullName = previewContact.name || '';
+        const parts = fullName.split(' ');
+        return parts.length > 1 ? parts.slice(1).join(' ') : '{last_name}';
+      }
+      
+      return previewContact[element.content] || `{${element.content}}`;
     } else if (element.type === 'qrcode') {
       return previewContact?.qr_code ? (
         <img src={previewContact.qr_code} alt="QR Code" className="w-full h-full object-contain" />
@@ -433,12 +447,16 @@ export const BadgeDesigner = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="name">Name</SelectItem>
-                        <SelectItem value="company">Company</SelectItem>
-                        <SelectItem value="title">Title</SelectItem>
+                        <SelectItem value="first_name">First Name</SelectItem>
+                        <SelectItem value="last_name">Last Name</SelectItem>
+                        <SelectItem value="name">Full Name</SelectItem>
+                        <SelectItem value="company">Company Name</SelectItem>
+                        <SelectItem value="title">Job Title</SelectItem>
                         <SelectItem value="type">Type</SelectItem>
                         <SelectItem value="booth_number">Booth Number</SelectItem>
                         <SelectItem value="ticket_type">Ticket Type</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="phone">Phone</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -503,6 +521,23 @@ export const BadgeDesigner = () => {
                         <SelectContent>
                           <SelectItem value="normal">Normal</SelectItem>
                           <SelectItem value="italic">Italic</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs">Text Alignment</Label>
+                      <Select
+                        value={selected.align || 'left'}
+                        onValueChange={(value) => updateElement(selected.id, { align: value })}
+                      >
+                        <SelectTrigger data-testid="text-align-select" className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="left">Left</SelectItem>
+                          <SelectItem value="center">Center</SelectItem>
+                          <SelectItem value="right">Right</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
