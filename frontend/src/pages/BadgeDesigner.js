@@ -460,12 +460,22 @@ export const BadgeDesigner = () => {
 
         {/* Center - Canvas */}
         <div className="flex-1 bg-slate-100 rounded-xl p-12 flex items-center justify-center overflow-auto">
+          {/* Ruler info */}
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 text-sm text-slate-600 font-medium">
+            Badge Size: {BADGE_WIDTH}" × {BADGE_HEIGHT}" (4 × 6 inches)
+          </div>
+          
           <div
             data-testid="badge-canvas"
-            className="bg-white shadow-2xl border border-slate-200 relative"
+            className="bg-white shadow-2xl border-2 border-slate-300 relative"
             style={{
               width: `${BADGE_WIDTH * SCALE}px`,
-              height: `${BADGE_HEIGHT * SCALE}px`
+              height: `${BADGE_HEIGHT * SCALE}px`,
+              backgroundImage: `
+                linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+                linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)
+              `,
+              backgroundSize: '24px 24px'
             }}
           >
             {elements.map((element) => (
