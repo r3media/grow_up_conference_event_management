@@ -452,10 +452,10 @@ export default function ContactManagement() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {contact.company ? (
+                      {contact.company_name ? (
                         <div className="flex items-center gap-2 text-sm">
                           <Building2 className="w-4 h-4 text-muted-foreground" />
-                          {contact.company}
+                          {contact.company_name}
                         </div>
                       ) : (
                         <span className="text-muted-foreground">-</span>
