@@ -69,13 +69,31 @@ export default function CompanyManagement() {
 
   const fetchCompanies = async () => {
     try {
-      const response = await axios.get(`${API}/companies`, getAuthHeaders());
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      
+      const response = await axios.get(`${API}/companies?${params.toString()}`, getAuthHeaders());
       setCompanies(response.data);
     } catch (error) {
       toast.error('Failed to load companies');
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchCompanyContacts = async (companyId) => {
+    try {
+      const response = await axios.get(`${API}/companies/${companyId}/contacts`, getAuthHeaders());
+      setContacts(response.data);
+    } catch (error) {
+      toast.error('Failed to load company contacts');
+    }
+  };
+
+  const openViewDialog = async (company) => {
+    setSelectedCompany(company);
+    await fetchCompanyContacts(company.id);
+    setViewDialogOpen(true);
   };
 
   const handleSubmit = async (e) => {
