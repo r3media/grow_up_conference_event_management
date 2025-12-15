@@ -66,6 +66,7 @@ export default function ContactManagement() {
   const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [companySearchOpen, setCompanySearchOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
