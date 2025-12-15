@@ -461,6 +461,36 @@ export default function CompanyDetail() {
                         ) : '-'}
                       </div>
                     </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            data-testid={`company-contact-actions-${contact.id}`}
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => openEditContactDialog(contact)}
+                            data-testid={`edit-company-contact-${contact.id}`}
+                          >
+                            <Pencil className="w-4 h-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => openDeleteContactDialog(contact)}
+                            className="text-destructive"
+                            data-testid={`delete-company-contact-${contact.id}`}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
