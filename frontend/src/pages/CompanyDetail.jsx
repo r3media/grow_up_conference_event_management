@@ -1,0 +1,258 @@
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { ArrowLeft, Globe, Building2, MapPin, Mail, Phone, Pencil } from 'lucide-react';
+import { toast } from 'sonner';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+const getAuthHeaders = () => ({
+  headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+});
+
+export default function CompanyDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [company, setCompany] = useState(null);
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCompanyDetails();
+    fetchCompanyContacts();
+  }, [id]);
+
+  const fetchCompanyDetails = async () => {
+    try {
+      const response = await axios.get(`${API}/companies/${id}`, getAuthHeaders());
+      setCompany(response.data);
+    } catch (error) {
+      toast.error('Failed to load company details');
+      navigate('/companies');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCompanyContacts = async () => {
+    try {
+      const response = await axios.get(`${API}/companies/${id}/contacts`, getAuthHeaders());
+      setContacts(response.data);
+    } catch (error) {
+      console.error('Failed to load contacts');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!company) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-6" data-testid="company-detail">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate('/companies')}
+            data-testid="back-button"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div>
+            <h1 className="text-4xl font-bold mb-2">{company.name}</h1>
+            <p className="text-muted-foreground">Company Details</p>
+          </div>
+        </div>
+        <Button
+          onClick={() => navigate(`/companies/${id}/edit`)}
+          className="gap-2"
+          data-testid="edit-company-button"
+        >
+          <Pencil className="w-4 h-4" />
+          Edit Company
+        </Button>
+      </div>
+
+      {/* Company Information */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Company Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Company Name</label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Building2 className="w-4 h-4 text-muted-foreground" />
+                  <p className="font-medium">{company.name}</p>
+                </div>
+              </div>
+              
+              {company.website && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Website</label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Globe className="w-4 h-4 text-muted-foreground" />
+                    <a
+                      href={company.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      {company.website}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {company.category && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Category</label>
+                <div className="mt-1">
+                  <span className="px-3 py-1 rounded-full text-sm bg-secondary/10 text-secondary font-medium">
+                    {company.category}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {company.description && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Description</label>
+                <p className="mt-1 text-sm">{company.description}</p>
+              </div>
+            )}
+
+            {company.address && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Address</label>
+                <div className="flex items-start gap-2 mt-1">
+                  <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
+                  <div className="text-sm">
+                    {company.address.street && <div>{company.address.street}</div>}
+                    <div>
+                      {company.address.city && `${company.address.city}, `}
+                      {company.address.province && `${company.address.province} `}
+                      {company.address.postal_code}
+                    </div>
+                    <div>{company.address.country}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Stats Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Statistics</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Total Contacts</label>
+              <p className="text-3xl font-bold mt-1">{company.contacts_count}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Created</label>
+              <p className="text-sm mt-1">
+                {new Date(company.created_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Contacts List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Contacts ({contacts.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {contacts.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No contacts found for this company
+            </div>
+          ) : (
+            <Table data-testid="company-contacts-table">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Position</TableHead>
+                  <TableHead>Tags</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {contacts.map((contact) => (
+                  <TableRow key={contact.id}>
+                    <TableCell className="font-medium">{contact.name}</TableCell>
+                    <TableCell>
+                      {contact.email ? (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Mail className="w-4 h-4 text-muted-foreground" />
+                          {contact.email}
+                        </div>
+                      ) : '-'}
+                    </TableCell>
+                    <TableCell>
+                      {contact.phone ? (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Phone className="w-4 h-4 text-muted-foreground" />
+                          {contact.phone}
+                        </div>
+                      ) : '-'}
+                    </TableCell>
+                    <TableCell className="text-sm">{contact.position || '-'}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {contact.tags?.length > 0 ? (
+                          contact.tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary"
+                            >
+                              {tag}
+                            </span>
+                          ))
+                        ) : '-'}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
