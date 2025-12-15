@@ -47,9 +47,12 @@ const getAuthHeaders = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
 });
 
+const provinces = ['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'];
+
 export default function CompanyManagement() {
   const [companies, setCompanies] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -59,8 +62,15 @@ export default function CompanyManagement() {
   const [formData, setFormData] = useState({
     name: '',
     website: '',
-    industry: '',
+    category: '',
     description: '',
+    address: {
+      street: '',
+      city: '',
+      province: 'Ontario',
+      postal_code: '',
+      country: 'Canada'
+    }
   });
 
   useEffect(() => {
