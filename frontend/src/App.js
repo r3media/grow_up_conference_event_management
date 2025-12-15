@@ -6,6 +6,8 @@ import Dashboard from '@/pages/Dashboard';
 import UserManagement from '@/pages/UserManagement';
 import ContactManagement from '@/pages/ContactManagement';
 import CompanyManagement from '@/pages/CompanyManagement';
+import CompanyDetail from '@/pages/CompanyDetail';
+import Settings from '@/pages/Settings';
 import MainLayout from '@/components/MainLayout';
 import { Toaster } from '@/components/ui/sonner';
 
