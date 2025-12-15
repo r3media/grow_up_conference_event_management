@@ -284,7 +284,7 @@ export default function ContactManagement() {
               
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="company">Company *</Label>
+                  <Label>Company *</Label>
                   <Button 
                     type="button" 
                     variant="link" 
@@ -295,18 +295,49 @@ export default function ContactManagement() {
                     + Create New Company
                   </Button>
                 </div>
-                <Select value={formData.company_id} onValueChange={(value) => setFormData({ ...formData, company_id: value })}>
-                  <SelectTrigger data-testid="contact-company-select">
-                    <SelectValue placeholder="Select a company" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.map((company) => (
-                      <SelectItem key={company.id} value={company.id}>
-                        {company.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={companySearchOpen} onOpenChange={setCompanySearchOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={companySearchOpen}
+                      className="w-full justify-between"
+                      data-testid="contact-company-select"
+                    >
+                      {formData.company_id
+                        ? companies.find((c) => c.id === formData.company_id)?.name
+                        : "Select company..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search company..." />
+                      <CommandEmpty>No company found.</CommandEmpty>
+                      <CommandGroup className="max-h-64 overflow-auto">
+                        {companies
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map((company) => (
+                          <CommandItem
+                            key={company.id}
+                            value={company.name}
+                            onSelect={() => {
+                              setFormData({ ...formData, company_id: company.id });
+                              setCompanySearchOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${
+                                formData.company_id === company.id ? "opacity-100" : "opacity-0"
+                              }`}
+                            />
+                            {company.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
