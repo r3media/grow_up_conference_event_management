@@ -717,10 +717,45 @@ async def update_company(company_id: str, company_data: CompanyUpdate, current_u
 
 @api_router.delete("/companies/{company_id}")
 async def delete_company(company_id: str, current_user: dict = Depends(get_current_user)):
+    # Check if company has contacts
+    contact_count = await db.contacts.count_documents({"company_id": company_id})
+    if contact_count > 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot delete company with {contact_count} associated contacts. Please reassign or delete contacts first."
+        )
+    
     result = await db.companies.delete_one({"id": company_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Company not found")
     return {"message": "Company deleted successfully"}
+
+@api_router.get("/companies/{company_id}/contacts", response_model=List[Contact])
+async def get_company_contacts(company_id: str, current_user: dict = Depends(get_current_user)):
+    # Verify company exists
+    company = await db.companies.find_one({"id": company_id})
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    contacts = await db.contacts.find({"company_id": company_id}, {"_id": 0}).to_list(1000)
+    
+    return [
+        Contact(
+            id=contact["id"],
+            name=contact["name"],
+            email=contact.get("email"),
+            phone=contact.get("phone"),
+            company_id=contact["company_id"],
+            company_name=company["name"],
+            position=contact.get("position"),
+            tags=contact.get("tags", []),
+            notes=contact.get("notes"),
+            created_at=datetime.fromisoformat(contact["created_at"]),
+            updated_at=datetime.fromisoformat(contact["updated_at"]),
+            created_by=contact["created_by"]
+        )
+        for contact in contacts
+    ]
 
 # Stats Route
 @api_router.get("/stats", response_model=StatsResponse)
