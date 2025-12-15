@@ -237,6 +237,22 @@ export default function CompanyManagement() {
         </Dialog>
       </div>
 
+      {/* Search */}
+      <Card>
+        <CardContent className=\"pt-6\">
+          <div className=\"relative\">
+            <Search className=\"absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4\" />
+            <Input
+              placeholder=\"Search by company name or industry...\"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className=\"pl-10\"
+              data-testid=\"company-search-input\"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>All Companies ({companies.length})</CardTitle>
