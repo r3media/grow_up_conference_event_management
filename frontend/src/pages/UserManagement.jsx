@@ -676,6 +676,9 @@ export default function UserManagement() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar>
+                          {user.photo_url ? (
+                            <AvatarImage src={`${BACKEND_URL}${user.photo_url}`} alt={user.name} />
+                          ) : null}
                           <AvatarFallback className="bg-primary text-primary-foreground">
                             {user.name.charAt(0)}
                           </AvatarFallback>
