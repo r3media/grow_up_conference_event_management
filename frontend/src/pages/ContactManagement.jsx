@@ -13,13 +13,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Table,
   TableBody,
   TableCell,
@@ -44,7 +37,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, MoreVertical, Pencil, Trash2, Mail, Phone, Building2, Search } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Trash2, Mail, Phone, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -56,40 +49,27 @@ const getAuthHeaders = () => ({
 
 export default function ContactManagement() {
   const [contacts, setContacts] = useState([]);
-  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    company_id: '',
+    company: '',
     position: '',
     tags: '',
     notes: '',
   });
-  const [newCompanyData, setNewCompanyData] = useState({
-    name: '',
-    website: '',
-    industry: '',
-    description: '',
-  });
 
   useEffect(() => {
     fetchContacts();
-    fetchCompanies();
-  }, [searchTerm]);
+  }, []);
 
   const fetchContacts = async () => {
     try {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append('search', searchTerm);
-      
-      const response = await axios.get(`${API}/contacts?${params.toString()}`, getAuthHeaders());
+      const response = await axios.get(`${API}/contacts`, getAuthHeaders());
       setContacts(response.data);
     } catch (error) {
       toast.error('Failed to load contacts');
@@ -98,23 +78,9 @@ export default function ContactManagement() {
     }
   };
 
-  const fetchCompanies = async () => {
-    try {
-      const response = await axios.get(`${API}/companies`, getAuthHeaders());
-      setCompanies(response.data);
-    } catch (error) {
-      console.error('Failed to load companies');
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.company_id) {
-      toast.error('Please select a company');
-      return;
-    }
-
     const submitData = {
       ...formData,
       tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
@@ -132,24 +98,8 @@ export default function ContactManagement() {
       setDialogOpen(false);
       resetForm();
       fetchContacts();
-      fetchCompanies();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Operation failed');
-    }
-  };
-
-  const handleCreateCompany = async (e) => {
-    e.preventDefault();
-    
-    try {
-      const response = await axios.post(`${API}/companies`, newCompanyData, getAuthHeaders());
-      toast.success('Company created successfully');
-      setCompanyDialogOpen(false);
-      setFormData({ ...formData, company_id: response.data.id });
-      fetchCompanies();
-      resetNewCompanyForm();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to create company');
     }
   };
 
@@ -162,7 +112,6 @@ export default function ContactManagement() {
       setDeleteDialogOpen(false);
       setSelectedContact(null);
       fetchContacts();
-      fetchCompanies();
     } catch (error) {
       toast.error('Failed to delete contact');
     }
@@ -173,21 +122,12 @@ export default function ContactManagement() {
       name: '',
       email: '',
       phone: '',
-      company_id: '',
+      company: '',
       position: '',
       tags: '',
       notes: '',
     });
     setSelectedContact(null);
-  };
-
-  const resetNewCompanyForm = () => {
-    setNewCompanyData({
-      name: '',
-      website: '',
-      industry: '',
-      description: '',
-    });
   };
 
   const openEditDialog = (contact) => {
@@ -196,7 +136,7 @@ export default function ContactManagement() {
       name: contact.name,
       email: contact.email || '',
       phone: contact.phone || '',
-      company_id: contact.company_id || '',
+      company: contact.company || '',
       position: contact.position || '',
       tags: contact.tags?.join(', ') || '',
       notes: contact.notes || '',
@@ -210,125 +150,106 @@ export default function ContactManagement() {
   };
 
   return (
-    <div className=\"space-y-6\" data-testid=\"contact-management\">
-      <div className=\"flex items-center justify-between\">
+    <div className="space-y-6" data-testid="contact-management">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className=\"text-4xl font-bold mb-2\">Contacts</h1>
-          <p className=\"text-muted-foreground\">Manage your conference contacts and attendees</p>
+          <h1 className="text-4xl font-bold mb-2">Contacts</h1>
+          <p className="text-muted-foreground">Manage your conference contacts and attendees</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
           if (!open) resetForm();
         }}>
           <DialogTrigger asChild>
-            <Button className=\"gap-2\" data-testid=\"add-contact-button\">
-              <Plus className=\"w-4 h-4\" />
+            <Button className="gap-2" data-testid="add-contact-button">
+              <Plus className="w-4 h-4" />
               Add Contact
             </Button>
           </DialogTrigger>
-          <DialogContent className=\"max-w-2xl max-h-[90vh] overflow-y-auto\" data-testid=\"contact-dialog\">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="contact-dialog">
             <DialogHeader>
               <DialogTitle>{selectedContact ? 'Edit Contact' : 'Add New Contact'}</DialogTitle>
               <DialogDescription>
                 {selectedContact ? 'Update contact details and information.' : 'Add a new contact to your conference database.'}
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className=\"space-y-4\">
-              <div className=\"grid grid-cols-2 gap-4\">
-                <div className=\"space-y-2\">
-                  <Label htmlFor=\"name\">Name *</Label>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name *</Label>
                   <Input
-                    id=\"name\"
+                    id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
-                    data-testid=\"contact-name-input\"
+                    data-testid="contact-name-input"
                   />
                 </div>
-                <div className=\"space-y-2\">
-                  <Label htmlFor=\"email\">Email</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
                   <Input
-                    id=\"email\"
-                    type=\"email\"
+                    id="email"
+                    type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    data-testid=\"contact-email-input\"
+                    data-testid="contact-email-input"
                   />
                 </div>
               </div>
-              <div className=\"grid grid-cols-2 gap-4\">
-                <div className=\"space-y-2\">
-                  <Label htmlFor=\"phone\">Phone</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
                   <Input
-                    id=\"phone\"
+                    id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    data-testid=\"contact-phone-input\"
+                    data-testid="contact-phone-input"
                   />
                 </div>
-                <div className=\"space-y-2\">
-                  <Label htmlFor=\"position\">Position</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="company">Company</Label>
                   <Input
-                    id=\"position\"
-                    value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                    data-testid=\"contact-position-input\"
+                    id="company"
+                    value={formData.company}
+                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                    data-testid="contact-company-input"
                   />
                 </div>
               </div>
-              
-              <div className=\"space-y-2\">
-                <div className=\"flex items-center justify-between\">
-                  <Label htmlFor=\"company\">Company *</Label>
-                  <Button 
-                    type=\"button\" 
-                    variant=\"link\" 
-                    size=\"sm\"
-                    onClick={() => setCompanyDialogOpen(true)}
-                    className=\"text-primary\"
-                  >
-                    + Create New Company
-                  </Button>
-                </div>
-                <Select value={formData.company_id} onValueChange={(value) => setFormData({ ...formData, company_id: value })}>
-                  <SelectTrigger data-testid=\"contact-company-select\">
-                    <SelectValue placeholder=\"Select a company\" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.map((company) => (
-                      <SelectItem key={company.id} value={company.id}>
-                        {company.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className=\"space-y-2\">
-                <Label htmlFor=\"tags\">Tags (comma-separated)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="position">Position</Label>
                 <Input
-                  id=\"tags\"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  placeholder=\"speaker, vip, sponsor\"
-                  data-testid=\"contact-tags-input\"
+                  id="position"
+                  value={formData.position}
+                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                  data-testid="contact-position-input"
                 />
               </div>
-              <div className=\"space-y-2\">
-                <Label htmlFor=\"notes\">Notes</Label>
+              <div className="space-y-2">
+                <Label htmlFor="tags">Tags (comma-separated)</Label>
+                <Input
+                  id="tags"
+                  value={formData.tags}
+                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                  placeholder="speaker, vip, sponsor"
+                  data-testid="contact-tags-input"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
                 <Textarea
-                  id=\"notes\"
+                  id="notes"
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   rows={3}
-                  data-testid=\"contact-notes-input\"
+                  data-testid="contact-notes-input"
                 />
               </div>
-              <div className=\"flex justify-end gap-2\">
-                <Button type=\"button\" variant=\"outline\" onClick={() => setDialogOpen(false)}>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type=\"submit\" data-testid=\"contact-submit-button\">
+                <Button type="submit" data-testid="contact-submit-button">
                   {selectedContact ? 'Update' : 'Create'}
                 </Button>
               </div>
@@ -337,86 +258,17 @@ export default function ContactManagement() {
         </Dialog>
       </div>
 
-      {/* Quick Company Creation Dialog */}
-      <Dialog open={companyDialogOpen} onOpenChange={setCompanyDialogOpen}>
-        <DialogContent data-testid=\"quick-company-dialog\">
-          <DialogHeader>
-            <DialogTitle>Create New Company</DialogTitle>
-            <DialogDescription>
-              Quickly add a new company to your database
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreateCompany} className=\"space-y-4\">
-            <div className=\"space-y-2\">
-              <Label htmlFor=\"company-name\">Company Name *</Label>
-              <Input
-                id=\"company-name\"
-                value={newCompanyData.name}
-                onChange={(e) => setNewCompanyData({ ...newCompanyData, name: e.target.value })}
-                required
-                data-testid=\"quick-company-name-input\"
-              />
-            </div>
-            <div className=\"grid grid-cols-2 gap-4\">
-              <div className=\"space-y-2\">
-                <Label htmlFor=\"company-website\">Website</Label>
-                <Input
-                  id=\"company-website\"
-                  type=\"url\"
-                  value={newCompanyData.website}
-                  onChange={(e) => setNewCompanyData({ ...newCompanyData, website: e.target.value })}
-                  placeholder=\"https://example.com\"
-                />
-              </div>
-              <div className=\"space-y-2\">
-                <Label htmlFor=\"company-industry\">Industry</Label>
-                <Input
-                  id=\"company-industry\"
-                  value={newCompanyData.industry}
-                  onChange={(e) => setNewCompanyData({ ...newCompanyData, industry: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className=\"flex justify-end gap-2\">
-              <Button type=\"button\" variant=\"outline\" onClick={() => {
-                setCompanyDialogOpen(false);
-                resetNewCompanyForm();
-              }}>
-                Cancel
-              </Button>
-              <Button type=\"submit\">Create Company</Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Search */}
-      <Card>
-        <CardContent className=\"pt-6\">
-          <div className=\"relative\">
-            <Search className=\"absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4\" />
-            <Input
-              placeholder=\"Search by name, email, or position...\"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className=\"pl-10\"
-              data-testid=\"contact-search-input\"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
       <Card>
         <CardHeader>
           <CardTitle>All Contacts ({contacts.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className=\"text-center py-8 text-muted-foreground\">Loading...</div>
+            <div className="text-center py-8 text-muted-foreground">Loading...</div>
           ) : contacts.length === 0 ? (
-            <div className=\"text-center py-8 text-muted-foreground\">No contacts found</div>
+            <div className="text-center py-8 text-muted-foreground">No contacts found</div>
           ) : (
-            <Table data-testid=\"contacts-table\">
+            <Table data-testid="contacts-table">
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -425,78 +277,78 @@ export default function ContactManagement() {
                   <TableHead>Company</TableHead>
                   <TableHead>Position</TableHead>
                   <TableHead>Tags</TableHead>
-                  <TableHead className=\"text-right\">Actions</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {contacts.map((contact) => (
                   <TableRow key={contact.id} data-testid={`contact-row-${contact.id}`}>
-                    <TableCell className=\"font-medium\">{contact.name}</TableCell>
+                    <TableCell className="font-medium">{contact.name}</TableCell>
                     <TableCell>
                       {contact.email ? (
-                        <div className=\"flex items-center gap-2 text-sm\">
-                          <Mail className=\"w-4 h-4 text-muted-foreground\" />
+                        <div className="flex items-center gap-2 text-sm">
+                          <Mail className="w-4 h-4 text-muted-foreground" />
                           {contact.email}
                         </div>
                       ) : (
-                        <span className=\"text-muted-foreground\">-</span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>
                       {contact.phone ? (
-                        <div className=\"flex items-center gap-2 text-sm\">
-                          <Phone className=\"w-4 h-4 text-muted-foreground\" />
+                        <div className="flex items-center gap-2 text-sm">
+                          <Phone className="w-4 h-4 text-muted-foreground" />
                           {contact.phone}
                         </div>
                       ) : (
-                        <span className=\"text-muted-foreground\">-</span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>
-                      {contact.company_name ? (
-                        <div className=\"flex items-center gap-2 text-sm\">
-                          <Building2 className=\"w-4 h-4 text-muted-foreground\" />
-                          {contact.company_name}
+                      {contact.company ? (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Building2 className="w-4 h-4 text-muted-foreground" />
+                          {contact.company}
                         </div>
                       ) : (
-                        <span className=\"text-muted-foreground\">-</span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    <TableCell className=\"text-sm\">{contact.position || '-'}</TableCell>
+                    <TableCell className="text-sm">{contact.position || '-'}</TableCell>
                     <TableCell>
-                      <div className=\"flex flex-wrap gap-1\">
+                      <div className="flex flex-wrap gap-1">
                         {contact.tags?.length > 0 ? (
                           contact.tags.map((tag, index) => (
                             <span
                               key={index}
-                              className=\"px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary\"
+                              className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary"
                             >
                               {tag}
                             </span>
                           ))
                         ) : (
-                          <span className=\"text-muted-foreground\">-</span>
+                          <span className="text-muted-foreground">-</span>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className=\"text-right\">
+                    <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant=\"ghost\" size=\"icon\" data-testid={`contact-actions-${contact.id}`}>
-                            <MoreVertical className=\"w-4 h-4\" />
+                          <Button variant="ghost" size="icon" data-testid={`contact-actions-${contact.id}`}>
+                            <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align=\"end\">
+                        <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEditDialog(contact)} data-testid={`edit-contact-${contact.id}`}>
-                            <Pencil className=\"w-4 h-4 mr-2\" />
+                            <Pencil className="w-4 h-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => openDeleteDialog(contact)}
-                            className=\"text-destructive\"
+                            className="text-destructive"
                             data-testid={`delete-contact-${contact.id}`}
                           >
-                            <Trash2 className=\"w-4 h-4 mr-2\" />
+                            <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -511,7 +363,7 @@ export default function ContactManagement() {
       </Card>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent data-testid=\"delete-contact-dialog\">
+        <AlertDialogContent data-testid="delete-contact-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -521,7 +373,7 @@ export default function ContactManagement() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className=\"bg-destructive text-destructive-foreground\" data-testid=\"confirm-delete-contact\">
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground" data-testid="confirm-delete-contact">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
