@@ -485,16 +485,14 @@ export default function CompanyDetail() {
                             onClick={() => openEditContactDialog(contact)}
                             data-testid={`edit-company-contact-${contact.id}`}
                           >
-                            <Pencil className="w-4 h-4 mr-2" />
-                            Edit
+                            <Pencil className="w-4 h-4" />
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => openDeleteContactDialog(contact)}
                             className="text-destructive"
                             data-testid={`delete-company-contact-${contact.id}`}
                           >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
+                            <Trash2 className="w-4 h-4" />
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
