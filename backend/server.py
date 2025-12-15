@@ -448,6 +448,8 @@ async def delete_user(user_id: str, current_user: dict = Depends(require_role(["
 async def get_contacts(
     search: Optional[str] = None,
     company_id: Optional[str] = None,
+    sort_by: Optional[str] = "name",
+    sort_order: Optional[str] = "asc",
     current_user: dict = Depends(get_current_user)
 ):
     query = {}
@@ -462,7 +464,9 @@ async def get_contacts(
     if company_id:
         query["company_id"] = company_id
     
-    contacts = await db.contacts.find(query, {"_id": 0}).to_list(1000)
+    # Sorting
+    sort_direction = 1 if sort_order == "asc" else -1
+    contacts = await db.contacts.find(query, {"_id": 0}).sort(sort_by, sort_direction).to_list(1000)
     
     # Enrich contacts with company names
     result = []
