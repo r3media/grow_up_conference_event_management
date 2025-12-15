@@ -131,7 +131,7 @@ class ContactBase(BaseModel):
     name: str
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    company: Optional[str] = None
+    company_id: str  # Required - FK to Company
     position: Optional[str] = None
     tags: List[str] = []
     notes: Optional[str] = None
@@ -143,7 +143,7 @@ class ContactUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    company: Optional[str] = None
+    company_id: Optional[str] = None
     position: Optional[str] = None
     tags: Optional[List[str]] = None
     notes: Optional[str] = None
@@ -151,6 +151,7 @@ class ContactUpdate(BaseModel):
 class Contact(ContactBase):
     model_config = ConfigDict(extra="ignore")
     id: str
+    company_name: Optional[str] = None  # Populated from company lookup
     created_at: datetime
     updated_at: datetime
     created_by: str
