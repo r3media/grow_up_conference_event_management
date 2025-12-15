@@ -429,7 +429,15 @@ export default function CompanyDetail() {
               <TableBody>
                 {contacts.map((contact) => (
                   <TableRow key={contact.id}>
-                    <TableCell className="font-medium">{contact.name}</TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => openEditContactDialog(contact)}
+                        className="font-medium text-primary hover:underline text-left"
+                        data-testid={`company-contact-name-link-${contact.id}`}
+                      >
+                        {contact.name}
+                      </button>
+                    </TableCell>
                     <TableCell>
                       {contact.email ? (
                         <div className="flex items-center gap-2 text-sm">
