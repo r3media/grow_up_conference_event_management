@@ -1,0 +1,110 @@
+{
+  "total_tests": 17,
+  "passed_tests": 17,
+  "failed_tests": 0,
+  "success_rate": 100.0,
+  "test_results": [
+    {
+      "test": "Login with demo credentials",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:27.860160"
+    },
+    {
+      "test": "Get current user info",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:27.904545"
+    },
+    {
+      "test": "Get dashboard statistics",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:27.950679"
+    },
+    {
+      "test": "Get all contacts",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:27.991921"
+    },
+    {
+      "test": "Create new contact",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.033714"
+    },
+    {
+      "test": "Get specific contact",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.066132"
+    },
+    {
+      "test": "Update contact",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.108692"
+    },
+    {
+      "test": "Delete contact",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.144185"
+    },
+    {
+      "test": "Get all companies",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.182325"
+    },
+    {
+      "test": "Create new company",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.224264"
+    },
+    {
+      "test": "Update company",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.264791"
+    },
+    {
+      "test": "Delete company",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.303235"
+    },
+    {
+      "test": "Get all users",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.380323"
+    },
+    {
+      "test": "Create new user",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.643391"
+    },
+    {
+      "test": "Update user",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.682082"
+    },
+    {
+      "test": "Delete user",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.717649"
+    },
+    {
+      "test": "Access user management (authorized role)",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T21:36:28.759721"
+    }
+  ]
+}
