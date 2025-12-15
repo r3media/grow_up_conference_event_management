@@ -570,7 +570,13 @@ export default function UserManagement() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium">{user.name}</div>
+                          <button
+                            onClick={() => openEditDialog(user)}
+                            className="font-medium text-primary hover:underline text-left"
+                            data-testid={`user-name-link-${user.id}`}
+                          >
+                            {user.name}
+                          </button>
                           {user.mobile_phone && (
                             <div className="text-xs text-muted-foreground">{user.mobile_phone}</div>
                           )}
