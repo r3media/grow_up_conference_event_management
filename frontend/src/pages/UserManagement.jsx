@@ -607,16 +607,14 @@ export default function UserManagement() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEditDialog(user)} data-testid={`edit-user-${user.id}`}>
-                            <Pencil className="w-4 h-4 mr-2" />
-                            Edit
+                            <Pencil className="w-4 h-4" />
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => openDeleteDialog(user)}
                             className="text-destructive"
                             data-testid={`delete-user-${user.id}`}
                           >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
+                            <Trash2 className="w-4 h-4" />
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
