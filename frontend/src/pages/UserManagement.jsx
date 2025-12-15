@@ -69,6 +69,9 @@ export default function UserManagement() {
   const [roleFilter, setRoleFilter] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [departments, setDepartments] = useState([]);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
