@@ -155,6 +155,7 @@ export default function ContactManagement() {
       setDeleteDialogOpen(false);
       setSelectedContact(null);
       fetchContacts();
+      fetchCompanies();
     } catch (error) {
       toast.error('Failed to delete contact');
     }
@@ -165,12 +166,21 @@ export default function ContactManagement() {
       name: '',
       email: '',
       phone: '',
-      company: '',
+      company_id: '',
       position: '',
       tags: '',
       notes: '',
     });
     setSelectedContact(null);
+  };
+
+  const resetNewCompanyForm = () => {
+    setNewCompanyData({
+      name: '',
+      website: '',
+      industry: '',
+      description: '',
+    });
   };
 
   const openEditDialog = (contact) => {
@@ -179,7 +189,7 @@ export default function ContactManagement() {
       name: contact.name,
       email: contact.email || '',
       phone: contact.phone || '',
-      company: contact.company || '',
+      company_id: contact.company_id || '',
       position: contact.position || '',
       tags: contact.tags?.join(', ') || '',
       notes: contact.notes || '',
