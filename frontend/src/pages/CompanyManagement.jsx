@@ -368,9 +368,9 @@ export default function CompanyManagement() {
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="max-w-4xl" data-testid="view-company-dialog">
           <DialogHeader>
-            <DialogTitle>Company Contacts - {selectedCompany?.name}</DialogTitle>
+            <DialogTitle>{selectedCompany?.name} - Contacts</DialogTitle>
             <DialogDescription>
-              View all contacts associated with this company.
+              All contacts associated with this company ({contacts.length})
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -386,17 +386,44 @@ export default function CompanyManagement() {
                     <TableHead>Email</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Position</TableHead>
+                    <TableHead>Tags</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {contacts.map((contact) => (
-                    <TableRow key={contact.id} data-testid={`contact-row-${contact.id}`}>
-                      <TableCell className="font-medium">
-                        {contact.first_name} {contact.last_name}
+                    <TableRow key={contact.id}>
+                      <TableCell className="font-medium">{contact.name}</TableCell>
+                      <TableCell>
+                        {contact.email ? (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="w-4 h-4 text-muted-foreground" />
+                            {contact.email}
+                          </div>
+                        ) : '-'}
                       </TableCell>
-                      <TableCell>{contact.email}</TableCell>
-                      <TableCell>{contact.phone || '-'}</TableCell>
-                      <TableCell>{contact.position || '-'}</TableCell>
+                      <TableCell>
+                        {contact.phone ? (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Phone className="w-4 h-4 text-muted-foreground" />
+                            {contact.phone}
+                          </div>
+                        ) : '-'}
+                      </TableCell>
+                      <TableCell className="text-sm">{contact.position || '-'}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {contact.tags?.length > 0 ? (
+                            contact.tags.map((tag, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary"
+                              >
+                                {tag}
+                              </span>
+                            ))
+                          ) : '-'}
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
