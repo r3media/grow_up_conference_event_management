@@ -75,7 +75,17 @@ export default function CompanyManagement() {
 
   useEffect(() => {
     fetchCompanies();
+    fetchCategories();
   }, [searchTerm]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${API}/settings/categories?category_type=business_category`, getAuthHeaders());
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Failed to load categories');
+    }
+  };
 
   const fetchCompanies = async () => {
     try {
