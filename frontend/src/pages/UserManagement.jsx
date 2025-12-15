@@ -277,6 +277,8 @@ export default function UserManagement() {
       password: '',
       is_active: user.is_active,
     });
+    setPhotoFile(null);
+    setPhotoPreview(user.photo_url ? `${BACKEND_URL}${user.photo_url}` : null);
     setDialogOpen(true);
   };
 
