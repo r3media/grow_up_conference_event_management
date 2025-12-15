@@ -44,7 +44,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, MoreVertical, Pencil, Trash2, Globe, Building2, Search, Eye, Mail, Phone } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Trash2, Globe, Building2, Search, Eye, Mail, Phone, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
