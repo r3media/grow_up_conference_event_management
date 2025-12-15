@@ -816,6 +816,7 @@ async def get_company_contacts(company_id: str, current_user: dict = Depends(get
             position=contact.get("position"),
             tags=contact.get("tags", []),
             notes=contact.get("notes"),
+            photo_url=contact.get("photo_url"),
             created_at=datetime.fromisoformat(contact["created_at"]),
             updated_at=datetime.fromisoformat(contact["updated_at"]),
             created_by=contact["created_by"]
