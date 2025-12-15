@@ -423,6 +423,7 @@ export default function CompanyDetail() {
                   <TableHead>Phone</TableHead>
                   <TableHead>Position</TableHead>
                   <TableHead>Tags</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
