@@ -486,9 +486,9 @@ export default function CompanyManagement() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openViewDialog(company)} data-testid={`view-company-${company.id}`}>
+                          <DropdownMenuItem onClick={() => window.location.href = `/companies/${company.id}`} data-testid={`view-company-${company.id}`}>
                             <Eye className="w-4 h-4 mr-2" />
-                            View Contacts
+                            View Details
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openEditDialog(company)} data-testid={`edit-company-${company.id}`}>
                             <Pencil className="w-4 h-4 mr-2" />
