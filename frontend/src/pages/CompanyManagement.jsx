@@ -245,14 +245,19 @@ export default function CompanyManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="industry">Industry</Label>
-                  <Input
-                    id="industry"
-                    value={formData.industry}
-                    onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                    placeholder="Technology, Healthcare, etc."
-                    data-testid="company-industry-input"
-                  />
+                  <Label htmlFor="category">Business Category</Label>
+                  <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                    <SelectTrigger data-testid="company-category-select">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.category_name}>
+                          {cat.category_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="space-y-2">
@@ -261,9 +266,60 @@ export default function CompanyManagement() {
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={4}
+                  rows={3}
                   data-testid="company-description-input"
                 />
+              </div>
+              
+              <div className="border-t pt-4">
+                <Label className="text-base font-semibold mb-3 block">Address (Canada)</Label>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="street">Street Address</Label>
+                    <Input
+                      id="street"
+                      value={formData.address.street}
+                      onChange={(e) => setFormData({ ...formData, address: { ...formData.address, street: e.target.value }})}
+                      data-testid="company-address-street-input"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        value={formData.address.city}
+                        onChange={(e) => setFormData({ ...formData, address: { ...formData.address, city: e.target.value }})}
+                        data-testid="company-address-city-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="province">Province</Label>
+                      <Select value={formData.address.province} onValueChange={(value) => setFormData({ ...formData, address: { ...formData.address, province: value }})}>
+                        <SelectTrigger data-testid="company-address-province-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {provinces.map((prov) => (
+                            <SelectItem key={prov} value={prov}>
+                              {prov}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="postal_code">Postal Code</Label>
+                      <Input
+                        id="postal_code"
+                        value={formData.address.postal_code}
+                        onChange={(e) => setFormData({ ...formData, address: { ...formData.address, postal_code: e.target.value }})}
+                        placeholder="A1A 1A1"
+                        data-testid="company-address-postal-input"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
