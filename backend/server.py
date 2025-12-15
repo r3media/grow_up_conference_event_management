@@ -423,24 +423,50 @@ async def delete_user(user_id: str, current_user: dict = Depends(require_role(["
 
 # Contact Routes
 @api_router.get("/contacts", response_model=List[Contact])
-async def get_contacts(current_user: dict = Depends(get_current_user)):
-    contacts = await db.contacts.find({}, {"_id": 0}).to_list(1000)
-    return [
-        Contact(
+async def get_contacts(
+    search: Optional[str] = None,
+    company_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    query = {}
+    
+    if search:
+        query["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}},
+            {"position": {"$regex": search, "$options": "i"}}
+        ]
+    
+    if company_id:
+        query["company_id"] = company_id
+    
+    contacts = await db.contacts.find(query, {"_id": 0}).to_list(1000)
+    
+    # Enrich contacts with company names
+    result = []
+    for contact in contacts:
+        company_name = None
+        if contact.get("company_id"):
+            company = await db.companies.find_one({"id": contact["company_id"]}, {"_id": 0, "name": 1})
+            if company:
+                company_name = company["name"]
+        
+        result.append(Contact(
             id=contact["id"],
             name=contact["name"],
             email=contact.get("email"),
             phone=contact.get("phone"),
-            company=contact.get("company"),
+            company_id=contact["company_id"],
+            company_name=company_name,
             position=contact.get("position"),
             tags=contact.get("tags", []),
             notes=contact.get("notes"),
             created_at=datetime.fromisoformat(contact["created_at"]),
             updated_at=datetime.fromisoformat(contact["updated_at"]),
             created_by=contact["created_by"]
-        )
-        for contact in contacts
-    ]
+        ))
+    
+    return result
 
 @api_router.post("/contacts", response_model=Contact)
 async def create_contact(contact_data: ContactCreate, current_user: dict = Depends(get_current_user)):
