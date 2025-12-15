@@ -91,12 +91,14 @@ export default function UserManagement() {
   useEffect(() => {
     fetchUsers();
     fetchDepartments();
-  }, [searchTerm, roleFilter, departmentFilter]);
+  }, [searchTerm, sortBy, sortOrder, roleFilter, departmentFilter]);
 
   const fetchUsers = async () => {
     try {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
+      params.append('sort_by', sortBy);
+      params.append('sort_order', sortOrder);
       if (roleFilter) params.append('role', roleFilter);
       if (departmentFilter) params.append('department', departmentFilter);
       
