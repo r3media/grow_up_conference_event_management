@@ -103,6 +103,11 @@ export default function ContactManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!formData.company_id) {
+      toast.error('Please select a company');
+      return;
+    }
+
     const submitData = {
       ...formData,
       tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
@@ -120,8 +125,24 @@ export default function ContactManagement() {
       setDialogOpen(false);
       resetForm();
       fetchContacts();
+      fetchCompanies();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Operation failed');
+    }
+  };
+
+  const handleCreateCompany = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const response = await axios.post(`${API}/companies`, newCompanyData, getAuthHeaders());
+      toast.success('Company created successfully');
+      setCompanyDialogOpen(false);
+      setFormData({ ...formData, company_id: response.data.id });
+      fetchCompanies();
+      resetNewCompanyForm();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to create company');
     }
   };
 
