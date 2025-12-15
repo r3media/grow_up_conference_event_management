@@ -937,6 +937,156 @@ async def delete_category(
         raise HTTPException(status_code=404, detail="Category not found")
     return {"message": "Category deleted successfully"}
 
+# Photo Upload Routes
+UPLOAD_DIR = Path("/app/uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+@api_router.post("/users/{user_id}/photo")
+async def upload_user_photo(
+    user_id: str,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    # Verify user exists
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Validate file extension
+    file_ext = Path(file.filename).suffix.lower()
+    if file_ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Invalid file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}")
+    
+    # Read file content
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File size exceeds 5MB limit")
+    
+    # Generate unique filename
+    unique_filename = f"user_{user_id}_{uuid.uuid4().hex[:8]}{file_ext}"
+    file_path = UPLOAD_DIR / unique_filename
+    
+    # Delete old photo if exists
+    if user.get("photo_url"):
+        old_filename = user["photo_url"].split("/")[-1]
+        old_path = UPLOAD_DIR / old_filename
+        if old_path.exists():
+            old_path.unlink()
+    
+    # Save new photo
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    # Update user record
+    photo_url = f"/api/uploads/{unique_filename}"
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"photo_url": photo_url, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"photo_url": photo_url, "message": "Photo uploaded successfully"}
+
+@api_router.delete("/users/{user_id}/photo")
+async def delete_user_photo(
+    user_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.get("photo_url"):
+        filename = user["photo_url"].split("/")[-1]
+        file_path = UPLOAD_DIR / filename
+        if file_path.exists():
+            file_path.unlink()
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"photo_url": None, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Photo deleted successfully"}
+
+@api_router.post("/contacts/{contact_id}/photo")
+async def upload_contact_photo(
+    contact_id: str,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    # Verify contact exists
+    contact = await db.contacts.find_one({"id": contact_id})
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    
+    # Validate file extension
+    file_ext = Path(file.filename).suffix.lower()
+    if file_ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Invalid file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}")
+    
+    # Read file content
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File size exceeds 5MB limit")
+    
+    # Generate unique filename
+    unique_filename = f"contact_{contact_id}_{uuid.uuid4().hex[:8]}{file_ext}"
+    file_path = UPLOAD_DIR / unique_filename
+    
+    # Delete old photo if exists
+    if contact.get("photo_url"):
+        old_filename = contact["photo_url"].split("/")[-1]
+        old_path = UPLOAD_DIR / old_filename
+        if old_path.exists():
+            old_path.unlink()
+    
+    # Save new photo
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    # Update contact record
+    photo_url = f"/api/uploads/{unique_filename}"
+    await db.contacts.update_one(
+        {"id": contact_id},
+        {"$set": {"photo_url": photo_url, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"photo_url": photo_url, "message": "Photo uploaded successfully"}
+
+@api_router.delete("/contacts/{contact_id}/photo")
+async def delete_contact_photo(
+    contact_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    contact = await db.contacts.find_one({"id": contact_id})
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    
+    if contact.get("photo_url"):
+        filename = contact["photo_url"].split("/")[-1]
+        file_path = UPLOAD_DIR / filename
+        if file_path.exists():
+            file_path.unlink()
+    
+    await db.contacts.update_one(
+        {"id": contact_id},
+        {"$set": {"photo_url": None, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Photo deleted successfully"}
+
+# Serve uploaded files
+from fastapi.responses import FileResponse
+
+@api_router.get("/uploads/{filename}")
+async def get_uploaded_file(filename: str):
+    file_path = UPLOAD_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path)
+
 # Include the router
 app.include_router(api_router)
 
