@@ -26,6 +26,7 @@ const navigation = [
   { name: 'Users', href: '/users', icon: Users, roles: ['Super Admin', 'Event Manager'] },
   { name: 'Contacts', href: '/contacts', icon: UserCircle },
   { name: 'Companies', href: '/companies', icon: Building2 },
+  { name: 'Settings', href: '/settings', icon: SettingsIcon, roles: ['Super Admin', 'Event Manager'] },
 ];
 
 export default function MainLayout({ children }) {
