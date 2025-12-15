@@ -44,7 +44,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Trash2, Search, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -55,6 +55,7 @@ const getAuthHeaders = () => ({
 });
 
 const roles = ['Super Admin', 'Event Manager', 'Conference Manager', 'Registration Manager', 'Staff'];
+const provinces = ['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'];
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -62,21 +63,42 @@ export default function UserManagement() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('');
+  const [departments, setDepartments] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     role: 'Staff',
+    mobile_phone: '',
+    job_title: '',
+    department: '',
+    tags: '',
+    address: {
+      street: '',
+      city: '',
+      province: 'Ontario',
+      postal_code: '',
+      country: 'Canada'
+    },
     password: '',
     is_active: true,
   });
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+    fetchDepartments();
+  }, [searchTerm, roleFilter, departmentFilter]);
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${API}/users`, getAuthHeaders());
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      if (roleFilter) params.append('role', roleFilter);
+      if (departmentFilter) params.append('department', departmentFilter);
+      
+      const response = await axios.get(`${API}/users?${params.toString()}`, getAuthHeaders());
       setUsers(response.data);
     } catch (error) {
       toast.error('Failed to load users');
@@ -85,27 +107,45 @@ export default function UserManagement() {
     }
   };
 
+  const fetchDepartments = async () => {
+    try {
+      const response = await axios.get(`${API}/departments`, getAuthHeaders());
+      setDepartments(response.data);
+    } catch (error) {
+      console.error('Failed to load departments');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    const submitData = {
+      ...formData,
+      tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+    };
+
+    // Clean up empty address
+    if (!submitData.address.street && !submitData.address.city && !submitData.address.postal_code) {
+      submitData.address = null;
+    }
+    
     try {
       if (selectedUser) {
-        // Update user
-        const updateData = { ...formData };
+        const updateData = { ...submitData };
         if (!updateData.password) {
           delete updateData.password;
         }
         await axios.put(`${API}/users/${selectedUser.id}`, updateData, getAuthHeaders());
         toast.success('User updated successfully');
       } else {
-        // Create user
-        await axios.post(`${API}/users`, formData, getAuthHeaders());
+        await axios.post(`${API}/users`, submitData, getAuthHeaders());
         toast.success('User created successfully');
       }
       
       setDialogOpen(false);
       resetForm();
       fetchUsers();
+      fetchDepartments();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Operation failed');
     }
@@ -130,6 +170,17 @@ export default function UserManagement() {
       name: '',
       email: '',
       role: 'Staff',
+      mobile_phone: '',
+      job_title: '',
+      department: '',
+      tags: '',
+      address: {
+        street: '',
+        city: '',
+        province: 'Ontario',
+        postal_code: '',
+        country: 'Canada'
+      },
       password: '',
       is_active: true,
     });
@@ -142,6 +193,17 @@ export default function UserManagement() {
       name: user.name,
       email: user.email,
       role: user.role,
+      mobile_phone: user.mobile_phone || '',
+      job_title: user.job_title || '',
+      department: user.department || '',
+      tags: user.tags?.join(', ') || '',
+      address: user.address || {
+        street: '',
+        city: '',
+        province: 'Ontario',
+        postal_code: '',
+        country: 'Canada'
+      },
       password: '',
       is_active: user.is_active,
     });
@@ -181,7 +243,7 @@ export default function UserManagement() {
               Add User
             </Button>
           </DialogTrigger>
-          <DialogContent data-testid="user-dialog">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" data-testid="user-dialog">
             <DialogHeader>
               <DialogTitle>{selectedUser ? 'Edit User' : 'Add New User'}</DialogTitle>
               <DialogDescription>
@@ -189,42 +251,141 @@ export default function UserManagement() {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    data-testid="user-name-input"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                    data-testid="user-email-input"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="mobile_phone">Mobile Phone</Label>
+                  <Input
+                    id="mobile_phone"
+                    value={formData.mobile_phone}
+                    onChange={(e) => setFormData({ ...formData, mobile_phone: e.target.value })}
+                    placeholder="+1 (555) 123-4567"
+                    data-testid="user-mobile-input"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role *</Label>
+                  <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+                    <SelectTrigger data-testid="user-role-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roles.map((role) => (
+                        <SelectItem key={role} value={role}>
+                          {role}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="job_title">Job Title</Label>
+                  <Input
+                    id="job_title"
+                    value={formData.job_title}
+                    onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
+                    data-testid="user-job-title-input"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="department">Department</Label>
+                  <Input
+                    id="department"
+                    value={formData.department}
+                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                    data-testid="user-department-input"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="tags">Tags (comma-separated)</Label>
                 <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  data-testid="user-name-input"
+                  id="tags"
+                  value={formData.tags}
+                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                  placeholder="vip, speaker, organizer"
+                  data-testid="user-tags-input"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                  data-testid="user-email-input"
-                />
+
+              <div className="border-t pt-4">
+                <Label className="text-base font-semibold mb-3 block">Address (Canada)</Label>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="street">Street Address</Label>
+                    <Input
+                      id="street"
+                      value={formData.address.street}
+                      onChange={(e) => setFormData({ ...formData, address: { ...formData.address, street: e.target.value }})}
+                      data-testid="user-address-street-input"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        value={formData.address.city}
+                        onChange={(e) => setFormData({ ...formData, address: { ...formData.address, city: e.target.value }})}
+                        data-testid="user-address-city-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="province">Province</Label>
+                      <Select value={formData.address.province} onValueChange={(value) => setFormData({ ...formData, address: { ...formData.address, province: value }})}>
+                        <SelectTrigger data-testid="user-address-province-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {provinces.map((prov) => (
+                            <SelectItem key={prov} value={prov}>
+                              {prov}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="postal_code">Postal Code</Label>
+                      <Input
+                        id="postal_code"
+                        value={formData.address.postal_code}
+                        onChange={(e) => setFormData({ ...formData, address: { ...formData.address, postal_code: e.target.value }})}
+                        placeholder="A1A 1A1"
+                        data-testid="user-address-postal-input"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                  <SelectTrigger data-testid="user-role-select">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="password">Password {selectedUser && '(leave blank to keep current)'}</Label>
                 <Input
@@ -236,7 +397,8 @@ export default function UserManagement() {
                   data-testid="user-password-input"
                 />
               </div>
-              <div className="flex justify-end gap-2">
+
+              <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancel
                 </Button>
@@ -248,6 +410,56 @@ export default function UserManagement() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Search and Filter */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-2 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Search by name, email, or job title..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+                data-testid="user-search-input"
+              />
+            </div>
+            <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <SelectTrigger data-testid="user-role-filter">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4" />
+                  <SelectValue placeholder="All Roles" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                {roles.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+              <SelectTrigger data-testid="user-department-filter">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4" />
+                  <SelectValue placeholder="All Departments" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept} value={dept}>
+                    {dept}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -265,6 +477,8 @@ export default function UserManagement() {
                   <TableHead>User</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Job Title</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -279,7 +493,12 @@ export default function UserManagement() {
                             {user.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="font-medium">{user.name}</span>
+                        <div>
+                          <div className="font-medium">{user.name}</div>
+                          {user.mobile_phone && (
+                            <div className="text-xs text-muted-foreground">{user.mobile_phone}</div>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-sm">{user.email}</TableCell>
@@ -288,6 +507,8 @@ export default function UserManagement() {
                         {user.role}
                       </span>
                     </TableCell>
+                    <TableCell className="text-sm">{user.department || '-'}</TableCell>
+                    <TableCell className="text-sm">{user.job_title || '-'}</TableCell>
                     <TableCell>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         user.is_active ? 'bg-secondary/20 text-secondary' : 'bg-destructive/20 text-destructive'
