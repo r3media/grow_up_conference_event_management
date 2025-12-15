@@ -372,7 +372,7 @@ export default function CompanyManagement() {
                 <TableRow>
                   <TableHead>Company</TableHead>
                   <TableHead>Website</TableHead>
-                  <TableHead>Industry</TableHead>
+                  <TableHead>Category</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -410,9 +410,9 @@ export default function CompanyManagement() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {company.industry ? (
+                      {company.category ? (
                         <span className="px-2 py-1 rounded-full text-xs bg-secondary/10 text-secondary font-medium">
-                          {company.industry}
+                          {company.category}
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>
