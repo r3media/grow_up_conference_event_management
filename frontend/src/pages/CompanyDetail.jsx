@@ -54,6 +54,17 @@ export default function CompanyDetail() {
   const [company, setCompany] = useState(null);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    position: '',
+    tags: '',
+    notes: '',
+  });
 
   useEffect(() => {
     fetchCompanyDetails();
