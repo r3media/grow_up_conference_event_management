@@ -719,10 +719,12 @@ async def update_company(company_id: str, company_data: CompanyUpdate, current_u
         update_dict["name"] = company_data.name
     if company_data.website is not None:
         update_dict["website"] = company_data.website
-    if company_data.industry is not None:
-        update_dict["industry"] = company_data.industry
+    if company_data.category is not None:
+        update_dict["category"] = company_data.category
     if company_data.description is not None:
         update_dict["description"] = company_data.description
+    if company_data.address is not None:
+        update_dict["address"] = company_data.address.model_dump()
     
     await db.companies.update_one({"id": company_id}, {"$set": update_dict})
     
@@ -731,8 +733,9 @@ async def update_company(company_id: str, company_data: CompanyUpdate, current_u
         id=updated_company["id"],
         name=updated_company["name"],
         website=updated_company.get("website"),
-        industry=updated_company.get("industry"),
+        category=updated_company.get("category"),
         description=updated_company.get("description"),
+        address=AddressModel(**updated_company["address"]) if updated_company.get("address") else None,
         contacts_count=updated_company.get("contacts_count", 0),
         created_at=datetime.fromisoformat(updated_company["created_at"]),
         updated_at=datetime.fromisoformat(updated_company["updated_at"]),
