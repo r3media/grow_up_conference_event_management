@@ -443,7 +443,7 @@ export default function CompanyManagement() {
                           <Building2 className="w-5 h-5 text-primary" />
                         </div>
                         <button
-                          onClick={() => window.location.href = `/companies/${company.id}`}
+                          onClick={() => openEditDialog(company)}
                           className="font-medium text-primary hover:underline text-left"
                           data-testid={`company-name-link-${company.id}`}
                         >
