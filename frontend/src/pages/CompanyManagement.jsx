@@ -154,8 +154,15 @@ export default function CompanyManagement() {
     setFormData({
       name: '',
       website: '',
-      industry: '',
+      category: '',
       description: '',
+      address: {
+        street: '',
+        city: '',
+        province: 'Ontario',
+        postal_code: '',
+        country: 'Canada'
+      }
     });
     setSelectedCompany(null);
   };
@@ -165,8 +172,15 @@ export default function CompanyManagement() {
     setFormData({
       name: company.name,
       website: company.website || '',
-      industry: company.industry || '',
+      category: company.category || '',
       description: company.description || '',
+      address: company.address || {
+        street: '',
+        city: '',
+        province: 'Ontario',
+        postal_code: '',
+        country: 'Canada'
+      }
     });
     setDialogOpen(true);
   };
