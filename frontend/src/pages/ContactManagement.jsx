@@ -602,16 +602,14 @@ export default function ContactManagement() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEditDialog(contact)} data-testid={`edit-contact-${contact.id}`}>
-                            <Pencil className="w-4 h-4 mr-2" />
-                            Edit
+                            <Pencil className="w-4 h-4" />
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => openDeleteDialog(contact)}
                             className="text-destructive"
                             data-testid={`delete-contact-${contact.id}`}
                           >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
+                            <Trash2 className="w-4 h-4" />
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
