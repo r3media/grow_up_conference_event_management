@@ -267,23 +267,41 @@ export default function ContactManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company</Label>
+                  <Label htmlFor="position">Position</Label>
                   <Input
-                    id="company"
-                    value={formData.company}
-                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                    data-testid="contact-company-input"
+                    id="position"
+                    value={formData.position}
+                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                    data-testid="contact-position-input"
                   />
                 </div>
               </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="position">Position</Label>
-                <Input
-                  id="position"
-                  value={formData.position}
-                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                  data-testid="contact-position-input"
-                />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="company">Company *</Label>
+                  <Button 
+                    type="button" 
+                    variant="link" 
+                    size="sm"
+                    onClick={() => setCompanyDialogOpen(true)}
+                    className="text-primary h-auto p-0"
+                  >
+                    + Create New Company
+                  </Button>
+                </div>
+                <Select value={formData.company_id} onValueChange={(value) => setFormData({ ...formData, company_id: value })}>
+                  <SelectTrigger data-testid="contact-company-select">
+                    <SelectValue placeholder="Select a company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
