@@ -470,12 +470,17 @@ async def get_contacts(
 
 @api_router.post("/contacts", response_model=Contact)
 async def create_contact(contact_data: ContactCreate, current_user: dict = Depends(get_current_user)):
+    # Verify company exists
+    company = await db.companies.find_one({"id": contact_data.company_id})
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found. Please create the company first.")
+    
     contact_dict = {
         "id": str(uuid.uuid4()),
         "name": contact_data.name,
         "email": contact_data.email,
         "phone": contact_data.phone,
-        "company": contact_data.company,
+        "company_id": contact_data.company_id,
         "position": contact_data.position,
         "tags": contact_data.tags,
         "notes": contact_data.notes,
@@ -486,12 +491,19 @@ async def create_contact(contact_data: ContactCreate, current_user: dict = Depen
     
     await db.contacts.insert_one(contact_dict)
     
+    # Increment company contact count
+    await db.companies.update_one(
+        {"id": contact_data.company_id},
+        {"$inc": {"contacts_count": 1}}
+    )
+    
     return Contact(
         id=contact_dict["id"],
         name=contact_dict["name"],
         email=contact_dict["email"],
         phone=contact_dict["phone"],
-        company=contact_dict["company"],
+        company_id=contact_dict["company_id"],
+        company_name=company["name"],
         position=contact_dict["position"],
         tags=contact_dict["tags"],
         notes=contact_dict["notes"],
