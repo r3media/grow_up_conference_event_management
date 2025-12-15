@@ -155,6 +155,9 @@ export default function CompanyManagement() {
           <DialogContent className="max-w-2xl" data-testid="company-dialog">
             <DialogHeader>
               <DialogTitle>{selectedCompany ? 'Edit Company' : 'Add New Company'}</DialogTitle>
+              <DialogDescription>
+                {selectedCompany ? 'Update company information and details.' : 'Add a new company to your database.'}
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
