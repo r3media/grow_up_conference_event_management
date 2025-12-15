@@ -548,14 +548,34 @@ async def update_contact(contact_id: str, contact_data: ContactUpdate, current_u
     
     update_dict = {"updated_at": datetime.now(timezone.utc).isoformat()}
     
+    # Handle company change
+    if contact_data.company_id is not None and contact_data.company_id != contact.get("company_id"):
+        # Verify new company exists
+        new_company = await db.companies.find_one({"id": contact_data.company_id})
+        if not new_company:
+            raise HTTPException(status_code=404, detail="Company not found")
+        
+        # Decrement old company count
+        if contact.get("company_id"):
+            await db.companies.update_one(
+                {"id": contact["company_id"]},
+                {"$inc": {"contacts_count": -1}}
+            )
+        
+        # Increment new company count
+        await db.companies.update_one(
+            {"id": contact_data.company_id},
+            {"$inc": {"contacts_count": 1}}
+        )
+        
+        update_dict["company_id"] = contact_data.company_id
+    
     if contact_data.name is not None:
         update_dict["name"] = contact_data.name
     if contact_data.email is not None:
         update_dict["email"] = contact_data.email
     if contact_data.phone is not None:
         update_dict["phone"] = contact_data.phone
-    if contact_data.company is not None:
-        update_dict["company"] = contact_data.company
     if contact_data.position is not None:
         update_dict["position"] = contact_data.position
     if contact_data.tags is not None:
@@ -566,12 +586,21 @@ async def update_contact(contact_id: str, contact_data: ContactUpdate, current_u
     await db.contacts.update_one({"id": contact_id}, {"$set": update_dict})
     
     updated_contact = await db.contacts.find_one({"id": contact_id}, {"_id": 0})
+    
+    # Get company name
+    company_name = None
+    if updated_contact.get("company_id"):
+        company = await db.companies.find_one({"id": updated_contact["company_id"]}, {"_id": 0, "name": 1})
+        if company:
+            company_name = company["name"]
+    
     return Contact(
         id=updated_contact["id"],
         name=updated_contact["name"],
         email=updated_contact.get("email"),
         phone=updated_contact.get("phone"),
-        company=updated_contact.get("company"),
+        company_id=updated_contact["company_id"],
+        company_name=company_name,
         position=updated_contact.get("position"),
         tags=updated_contact.get("tags", []),
         notes=updated_contact.get("notes"),
