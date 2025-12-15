@@ -303,7 +303,111 @@ export default function CompanyDetail() {
       {/* Contacts List */}
       <Card>
         <CardHeader>
-          <CardTitle>Contacts ({contacts.length})</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Contacts ({contacts.length})</CardTitle>
+            <Dialog
+              open={contactDialogOpen}
+              onOpenChange={(open) => {
+                setContactDialogOpen(open);
+                if (!open) resetContactForm();
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button className="gap-2" data-testid="add-contact-to-company-button">
+                  <Plus className="w-4 h-4" />
+                  Add Contact
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl" data-testid="company-contact-dialog">
+                <DialogHeader>
+                  <DialogTitle>
+                    {selectedContact ? 'Edit Contact' : 'Add New Contact'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {selectedContact
+                      ? 'Update contact information.'
+                      : `Add a new contact to ${company?.name}.`}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmitContact} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Name *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        required
+                        data-testid="company-contact-name-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        data-testid="company-contact-email-input"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone</Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        data-testid="company-contact-phone-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="position">Position</Label>
+                      <Input
+                        id="position"
+                        value={formData.position}
+                        onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                        data-testid="company-contact-position-input"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tags">Tags (comma-separated)</Label>
+                    <Input
+                      id="tags"
+                      value={formData.tags}
+                      onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                      placeholder="speaker, vip, sponsor"
+                      data-testid="company-contact-tags-input"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">Notes</Label>
+                    <Textarea
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      rows={3}
+                      data-testid="company-contact-notes-input"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setContactDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" data-testid="company-contact-submit-button">
+                      {selectedContact ? 'Update' : 'Add Contact'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardHeader>
         <CardContent>
           {contacts.length === 0 ? (
