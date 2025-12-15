@@ -1,11 +1,30 @@
 import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building2, Users, Calendar, Package } from 'lucide-react';
-import CompanySettings from '@/components/settings/CompanySettings';
+import { Building2, Users, Calendar, Package, ChevronRight, Tag } from 'lucide-react';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('company');
+  const navigate = useNavigate();
+
+  const SettingLink = ({ icon: Icon, title, description, onClick }) => (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors text-left"
+    >
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
+          <Icon className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h3 className="font-semibold">{title}</h3>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+    </button>
+  );
 
   return (
     <div className="space-y-6" data-testid="settings-page">
@@ -37,7 +56,14 @@ export default function Settings() {
             </TabsList>
 
             <TabsContent value="company" className="mt-6">
-              <CompanySettings />
+              <div className="space-y-4">
+                <SettingLink
+                  icon={Tag}
+                  title="Business Categories"
+                  description="Manage business categories for company classification"
+                  onClick={() => navigate('/settings/categories/business')}
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="user" className="mt-6">
