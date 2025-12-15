@@ -656,6 +656,8 @@ async def delete_contact(contact_id: str, current_user: dict = Depends(get_curre
 @api_router.get("/companies", response_model=List[Company])
 async def get_companies(
     search: Optional[str] = None,
+    sort_by: Optional[str] = "name",
+    sort_order: Optional[str] = "asc",
     current_user: dict = Depends(get_current_user)
 ):
     query = {}
@@ -663,10 +665,12 @@ async def get_companies(
     if search:
         query["$or"] = [
             {"name": {"$regex": search, "$options": "i"}},
-            {"industry": {"$regex": search, "$options": "i"}}
+            {"category": {"$regex": search, "$options": "i"}}
         ]
     
-    companies = await db.companies.find(query, {"_id": 0}).to_list(1000)
+    # Sorting
+    sort_direction = 1 if sort_order == "asc" else -1
+    companies = await db.companies.find(query, {"_id": 0}).sort(sort_by, sort_direction).to_list(1000)
     return [
         Company(
             id=company["id"],
