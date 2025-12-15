@@ -518,12 +518,20 @@ async def get_contact(contact_id: str, current_user: dict = Depends(get_current_
     if not contact:
         raise HTTPException(status_code=404, detail="Contact not found")
     
+    # Get company name
+    company_name = None
+    if contact.get("company_id"):
+        company = await db.companies.find_one({"id": contact["company_id"]}, {"_id": 0, "name": 1})
+        if company:
+            company_name = company["name"]
+    
     return Contact(
         id=contact["id"],
         name=contact["name"],
         email=contact.get("email"),
         phone=contact.get("phone"),
-        company=contact.get("company"),
+        company_id=contact["company_id"],
+        company_name=company_name,
         position=contact.get("position"),
         tags=contact.get("tags", []),
         notes=contact.get("notes"),
