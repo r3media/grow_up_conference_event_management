@@ -159,8 +159,9 @@ class Contact(ContactBase):
 class CompanyBase(BaseModel):
     name: str
     website: Optional[str] = None
-    industry: Optional[str] = None
+    category: Optional[str] = None  # Business category from settings
     description: Optional[str] = None
+    address: Optional[AddressModel] = None
 
 class CompanyCreate(CompanyBase):
     pass
@@ -168,8 +169,9 @@ class CompanyCreate(CompanyBase):
 class CompanyUpdate(BaseModel):
     name: Optional[str] = None
     website: Optional[str] = None
-    industry: Optional[str] = None
+    category: Optional[str] = None
     description: Optional[str] = None
+    address: Optional[AddressModel] = None
 
 class Company(CompanyBase):
     model_config = ConfigDict(extra="ignore")
@@ -178,6 +180,26 @@ class Company(CompanyBase):
     created_at: datetime
     updated_at: datetime
     created_by: str
+
+class CategoryBase(BaseModel):
+    category_type: str  # e.g., "business_category", "user_department", etc.
+    category_name: str
+    display_order: int = 0
+    is_active: bool = True
+
+class CategoryCreate(CategoryBase):
+    pass
+
+class CategoryUpdate(BaseModel):
+    category_name: Optional[str] = None
+    display_order: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class Category(CategoryBase):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    created_at: datetime
+    updated_at: datetime
 
 class StatsResponse(BaseModel):
     total_users: int
