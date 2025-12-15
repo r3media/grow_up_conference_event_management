@@ -472,8 +472,9 @@ async def get_contacts(
     result = []
     for contact in contacts:
         company_name = None
-        if contact.get("company_id"):
-            company = await db.companies.find_one({"id": contact["company_id"]}, {"_id": 0, "name": 1})
+        company_id = contact.get("company_id")
+        if company_id:
+            company = await db.companies.find_one({"id": company_id}, {"_id": 0, "name": 1})
             if company:
                 company_name = company["name"]
         
@@ -482,7 +483,7 @@ async def get_contacts(
             name=contact["name"],
             email=contact.get("email"),
             phone=contact.get("phone"),
-            company_id=contact["company_id"],
+            company_id=company_id or "",
             company_name=company_name,
             position=contact.get("position"),
             tags=contact.get("tags", []),
