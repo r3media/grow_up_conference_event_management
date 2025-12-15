@@ -611,9 +611,18 @@ async def update_contact(contact_id: str, contact_data: ContactUpdate, current_u
 
 @api_router.delete("/contacts/{contact_id}")
 async def delete_contact(contact_id: str, current_user: dict = Depends(get_current_user)):
-    result = await db.contacts.delete_one({"id": contact_id})
-    if result.deleted_count == 0:
+    contact = await db.contacts.find_one({"id": contact_id})
+    if not contact:
         raise HTTPException(status_code=404, detail="Contact not found")
+    
+    # Decrement company contact count
+    if contact.get("company_id"):
+        await db.companies.update_one(
+            {"id": contact["company_id"]},
+            {"$inc": {"contacts_count": -1}}
+        )
+    
+    await db.contacts.delete_one({"id": contact_id})
     return {"message": "Contact deleted successfully"}
 
 # Company Routes
