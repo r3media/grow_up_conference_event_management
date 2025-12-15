@@ -92,6 +92,78 @@ export default function CompanyDetail() {
     }
   };
 
+  const handleSubmitContact = async (e) => {
+    e.preventDefault();
+
+    const submitData = {
+      ...formData,
+      company_id: id,
+      tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+    };
+
+    try {
+      if (selectedContact) {
+        await axios.put(`${API}/contacts/${selectedContact.id}`, submitData, getAuthHeaders());
+        toast.success('Contact updated successfully');
+      } else {
+        await axios.post(`${API}/contacts`, submitData, getAuthHeaders());
+        toast.success('Contact added successfully');
+      }
+
+      setContactDialogOpen(false);
+      resetContactForm();
+      fetchCompanyDetails();
+      fetchCompanyContacts();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Operation failed');
+    }
+  };
+
+  const handleDeleteContact = async () => {
+    if (!selectedContact) return;
+
+    try {
+      await axios.delete(`${API}/contacts/${selectedContact.id}`, getAuthHeaders());
+      toast.success('Contact deleted successfully');
+      setDeleteDialogOpen(false);
+      setSelectedContact(null);
+      fetchCompanyDetails();
+      fetchCompanyContacts();
+    } catch (error) {
+      toast.error('Failed to delete contact');
+    }
+  };
+
+  const resetContactForm = () => {
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      position: '',
+      tags: '',
+      notes: '',
+    });
+    setSelectedContact(null);
+  };
+
+  const openEditContactDialog = (contact) => {
+    setSelectedContact(contact);
+    setFormData({
+      name: contact.name,
+      email: contact.email || '',
+      phone: contact.phone || '',
+      position: contact.position || '',
+      tags: contact.tags?.join(', ') || '',
+      notes: contact.notes || '',
+    });
+    setContactDialogOpen(true);
+  };
+
+  const openDeleteContactDialog = (contact) => {
+    setSelectedContact(contact);
+    setDeleteDialogOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
