@@ -824,6 +824,107 @@ async def get_departments(current_user: dict = Depends(get_current_user)):
     departments = await db.users.distinct("department")
     return [dept for dept in departments if dept]
 
+# Settings / Category Routes
+@api_router.get("/settings/categories", response_model=List[Category])
+async def get_categories(
+    category_type: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    query = {}
+    if category_type:
+        query["category_type"] = category_type
+    
+    categories = await db.categories.find(query, {"_id": 0}).sort("display_order", 1).to_list(1000)
+    return [
+        Category(
+            id=cat["id"],
+            category_type=cat["category_type"],
+            category_name=cat["category_name"],
+            display_order=cat.get("display_order", 0),
+            is_active=cat.get("is_active", True),
+            created_at=datetime.fromisoformat(cat["created_at"]),
+            updated_at=datetime.fromisoformat(cat["updated_at"])
+        )
+        for cat in categories
+    ]
+
+@api_router.post("/settings/categories", response_model=Category)
+async def create_category(
+    category_data: CategoryCreate,
+    current_user: dict = Depends(require_role(["Super Admin", "Event Manager"]))
+):
+    # Check for duplicates
+    existing = await db.categories.find_one({
+        "category_type": category_data.category_type,
+        "category_name": category_data.category_name
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Category already exists")
+    
+    category_dict = {
+        "id": str(uuid.uuid4()),
+        "category_type": category_data.category_type,
+        "category_name": category_data.category_name,
+        "display_order": category_data.display_order,
+        "is_active": category_data.is_active,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.categories.insert_one(category_dict)
+    
+    return Category(
+        id=category_dict["id"],
+        category_type=category_dict["category_type"],
+        category_name=category_dict["category_name"],
+        display_order=category_dict["display_order"],
+        is_active=category_dict["is_active"],
+        created_at=datetime.fromisoformat(category_dict["created_at"]),
+        updated_at=datetime.fromisoformat(category_dict["updated_at"])
+    )
+
+@api_router.put("/settings/categories/{category_id}", response_model=Category)
+async def update_category(
+    category_id: str,
+    category_data: CategoryUpdate,
+    current_user: dict = Depends(require_role(["Super Admin", "Event Manager"]))
+):
+    category = await db.categories.find_one({"id": category_id})
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    update_dict = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    
+    if category_data.category_name is not None:
+        update_dict["category_name"] = category_data.category_name
+    if category_data.display_order is not None:
+        update_dict["display_order"] = category_data.display_order
+    if category_data.is_active is not None:
+        update_dict["is_active"] = category_data.is_active
+    
+    await db.categories.update_one({"id": category_id}, {"$set": update_dict})
+    
+    updated_category = await db.categories.find_one({"id": category_id}, {"_id": 0})
+    return Category(
+        id=updated_category["id"],
+        category_type=updated_category["category_type"],
+        category_name=updated_category["category_name"],
+        display_order=updated_category.get("display_order", 0),
+        is_active=updated_category.get("is_active", True),
+        created_at=datetime.fromisoformat(updated_category["created_at"]),
+        updated_at=datetime.fromisoformat(updated_category["updated_at"])
+    )
+
+@api_router.delete("/settings/categories/{category_id}")
+async def delete_category(
+    category_id: str,
+    current_user: dict = Depends(require_role(["Super Admin", "Event Manager"]))
+):
+    result = await db.categories.delete_one({"id": category_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return {"message": "Category deleted successfully"}
+
 # Include the router
 app.include_router(api_router)
 
