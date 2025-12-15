@@ -474,11 +474,83 @@ export default function UserManagement() {
             <Table data-testid="users-table">
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 font-semibold -ml-3"
+                      onClick={() => {
+                        setRoleFilter('');
+                        setDepartmentFilter('');
+                        const newOrder = sortBy === 'name' && sortOrder === 'asc' ? 'desc' : 'asc';
+                        setSortBy('name');
+                        setSortOrder(newOrder);
+                      }}
+                    >
+                      User
+                      {sortBy === 'name' && (
+                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+                      )}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 font-semibold -ml-3"
+                      onClick={() => {
+                        setRoleFilter('');
+                        setDepartmentFilter('');
+                        const newOrder = sortBy === 'email' && sortOrder === 'asc' ? 'desc' : 'asc';
+                        setSortBy('email');
+                        setSortOrder(newOrder);
+                      }}
+                    >
+                      Email
+                      {sortBy === 'email' && (
+                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+                      )}
+                    </Button>
+                  </TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Job Title</TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 font-semibold -ml-3"
+                      onClick={() => {
+                        setRoleFilter('');
+                        setDepartmentFilter('');
+                        const newOrder = sortBy === 'department' && sortOrder === 'asc' ? 'desc' : 'asc';
+                        setSortBy('department');
+                        setSortOrder(newOrder);
+                      }}
+                    >
+                      Department
+                      {sortBy === 'department' && (
+                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+                      )}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 font-semibold -ml-3"
+                      onClick={() => {
+                        setRoleFilter('');
+                        setDepartmentFilter('');
+                        const newOrder = sortBy === 'job_title' && sortOrder === 'asc' ? 'desc' : 'asc';
+                        setSortBy('job_title');
+                        setSortOrder(newOrder);
+                      }}
+                    >
+                      Job Title
+                      {sortBy === 'job_title' && (
+                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+                      )}
+                    </Button>
+                  </TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
