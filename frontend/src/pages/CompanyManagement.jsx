@@ -85,7 +85,7 @@ export default function CompanyManagement() {
   useEffect(() => {
     fetchCompanies();
     fetchCategories();
-  }, [searchTerm]);
+  }, [searchTerm, sortBy, sortOrder]);
 
   const fetchCategories = async () => {
     try {
@@ -100,6 +100,8 @@ export default function CompanyManagement() {
     try {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
+      params.append('sort_by', sortBy);
+      params.append('sort_order', sortOrder);
       
       const response = await axios.get(`${API}/companies?${params.toString()}`, getAuthHeaders());
       setCompanies(response.data);
