@@ -771,6 +771,12 @@ async def get_stats(current_user: dict = Depends(get_current_user)):
         active_events=0  # Placeholder for future implementation
     )
 
+# Utility Routes
+@api_router.get("/departments")
+async def get_departments(current_user: dict = Depends(get_current_user)):
+    departments = await db.users.distinct("department")
+    return [dept for dept in departments if dept]
+
 # Include the router
 app.include_router(api_router)
 
