@@ -491,16 +491,14 @@ export default function CompanyManagement() {
                             View Details
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openEditDialog(company)} data-testid={`edit-company-${company.id}`}>
-                            <Pencil className="w-4 h-4 mr-2" />
-                            Edit
+                            <Pencil className="w-4 h-4" />
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => openDeleteDialog(company)}
                             className="text-destructive"
                             data-testid={`delete-company-${company.id}`}
                           >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
+                            <Trash2 className="w-4 h-4" />
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
