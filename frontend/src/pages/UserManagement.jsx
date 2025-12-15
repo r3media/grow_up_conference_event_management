@@ -253,6 +253,8 @@ export default function UserManagement() {
       is_active: true,
     });
     setSelectedUser(null);
+    setPhotoFile(null);
+    setPhotoPreview(null);
   };
 
   const openEditDialog = (user) => {
