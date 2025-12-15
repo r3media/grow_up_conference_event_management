@@ -281,7 +281,13 @@ export default function CompanyManagement() {
                         <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
                           <Building2 className="w-5 h-5 text-primary" />
                         </div>
-                        <span className="font-medium">{company.name}</span>
+                        <button
+                          onClick={() => window.location.href = `/companies/${company.id}`}
+                          className="font-medium text-primary hover:underline text-left"
+                          data-testid={`company-name-link-${company.id}`}
+                        >
+                          {company.name}
+                        </button>
                       </div>
                     </TableCell>
                     <TableCell>
