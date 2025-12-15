@@ -126,12 +126,19 @@ export default function CompanyManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    const submitData = { ...formData };
+    
+    // Clean up empty address
+    if (!submitData.address.street && !submitData.address.city && !submitData.address.postal_code) {
+      submitData.address = null;
+    }
+    
     try {
       if (selectedCompany) {
-        await axios.put(`${API}/companies/${selectedCompany.id}`, formData, getAuthHeaders());
+        await axios.put(`${API}/companies/${selectedCompany.id}`, submitData, getAuthHeaders());
         toast.success('Company updated successfully');
       } else {
-        await axios.post(`${API}/companies`, formData, getAuthHeaders());
+        await axios.post(`${API}/companies`, submitData, getAuthHeaders());
         toast.success('Company created successfully');
       }
       
