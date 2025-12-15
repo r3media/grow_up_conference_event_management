@@ -568,6 +568,7 @@ async def get_contact(contact_id: str, current_user: dict = Depends(get_current_
         position=contact.get("position"),
         tags=contact.get("tags", []),
         notes=contact.get("notes"),
+        photo_url=contact.get("photo_url"),
         created_at=datetime.fromisoformat(contact["created_at"]),
         updated_at=datetime.fromisoformat(contact["updated_at"]),
         created_by=contact["created_by"]
@@ -615,6 +616,8 @@ async def update_contact(contact_id: str, contact_data: ContactUpdate, current_u
         update_dict["tags"] = contact_data.tags
     if contact_data.notes is not None:
         update_dict["notes"] = contact_data.notes
+    if contact_data.photo_url is not None:
+        update_dict["photo_url"] = contact_data.photo_url
     
     await db.contacts.update_one({"id": contact_id}, {"$set": update_dict})
     
@@ -637,6 +640,7 @@ async def update_contact(contact_id: str, contact_data: ContactUpdate, current_u
         position=updated_contact.get("position"),
         tags=updated_contact.get("tags", []),
         notes=updated_contact.get("notes"),
+        photo_url=updated_contact.get("photo_url"),
         created_at=datetime.fromisoformat(updated_contact["created_at"]),
         updated_at=datetime.fromisoformat(updated_contact["updated_at"]),
         created_by=updated_contact["created_by"]
