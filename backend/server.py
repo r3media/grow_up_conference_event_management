@@ -279,14 +279,40 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 
 # User Management Routes
 @api_router.get("/users", response_model=List[User])
-async def get_users(current_user: dict = Depends(require_role(["Super Admin", "Event Manager"]))):
-    users = await db.users.find({}, {"_id": 0, "hashed_password": 0}).to_list(1000)
+async def get_users(
+    search: Optional[str] = None,
+    role: Optional[str] = None,
+    department: Optional[str] = None,
+    current_user: dict = Depends(require_role(["Super Admin", "Event Manager"]))
+):
+    query = {}
+    
+    if search:
+        query["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}},
+            {"job_title": {"$regex": search, "$options": "i"}}
+        ]
+    
+    if role:
+        query["role"] = role
+    
+    if department:
+        query["department"] = department
+    
+    users = await db.users.find(query, {"_id": 0, "hashed_password": 0}).to_list(1000)
     return [
         User(
             id=user["id"],
             email=user["email"],
             name=user["name"],
             role=user["role"],
+            photo_url=user.get("photo_url"),
+            mobile_phone=user.get("mobile_phone"),
+            address=AddressModel(**user["address"]) if user.get("address") else None,
+            job_title=user.get("job_title"),
+            department=user.get("department"),
+            tags=user.get("tags", []),
             is_active=user["is_active"],
             created_at=datetime.fromisoformat(user["created_at"]),
             updated_at=datetime.fromisoformat(user["updated_at"])
