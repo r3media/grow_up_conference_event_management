@@ -77,10 +77,23 @@ def require_role(allowed_roles: List[str]):
     return role_checker
 
 # Models
+class AddressModel(BaseModel):
+    street: Optional[str] = None
+    city: Optional[str] = None
+    province: Optional[str] = None
+    postal_code: Optional[str] = None
+    country: str = "Canada"
+
 class UserBase(BaseModel):
     email: EmailStr
     name: str
     role: str = Field(default="Staff")  # Super Admin, Event Manager, Conference Manager, Registration Manager, Staff
+    photo_url: Optional[str] = None
+    mobile_phone: Optional[str] = None
+    address: Optional[AddressModel] = None
+    job_title: Optional[str] = None
+    department: Optional[str] = None
+    tags: List[str] = []
     is_active: bool = True
 
 class UserCreate(UserBase):
@@ -90,6 +103,12 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     name: Optional[str] = None
     role: Optional[str] = None
+    photo_url: Optional[str] = None
+    mobile_phone: Optional[str] = None
+    address: Optional[AddressModel] = None
+    job_title: Optional[str] = None
+    department: Optional[str] = None
+    tags: Optional[List[str]] = None
     is_active: Optional[bool] = None
     password: Optional[str] = None
 
