@@ -363,6 +363,53 @@ export default function CompanyManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* View Company Contacts Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-4xl" data-testid="view-company-dialog">
+          <DialogHeader>
+            <DialogTitle>Company Contacts - {selectedCompany?.name}</DialogTitle>
+            <DialogDescription>
+              View all contacts associated with this company.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {contacts.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No contacts found for this company
+              </div>
+            ) : (
+              <Table data-testid="company-contacts-table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Position</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {contacts.map((contact) => (
+                    <TableRow key={contact.id} data-testid={`contact-row-${contact.id}`}>
+                      <TableCell className="font-medium">
+                        {contact.first_name} {contact.last_name}
+                      </TableCell>
+                      <TableCell>{contact.email}</TableCell>
+                      <TableCell>{contact.phone || '-'}</TableCell>
+                      <TableCell>{contact.position || '-'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
