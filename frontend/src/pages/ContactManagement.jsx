@@ -88,12 +88,14 @@ export default function ContactManagement() {
   useEffect(() => {
     fetchContacts();
     fetchCompanies();
-  }, [searchTerm]);
+  }, [searchTerm, sortBy, sortOrder]);
 
   const fetchContacts = async () => {
     try {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
+      params.append('sort_by', sortBy);
+      params.append('sort_order', sortOrder);
       
       const response = await axios.get(`${API}/contacts?${params.toString()}`, getAuthHeaders());
       setContacts(response.data);
