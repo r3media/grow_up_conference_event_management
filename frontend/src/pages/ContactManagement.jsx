@@ -149,8 +149,9 @@ export default function ContactManagement() {
       const response = await axios.post(`${API}/companies`, newCompanyData, getAuthHeaders());
       toast.success('Company created successfully');
       setCompanyDialogOpen(false);
+      // Auto-select the newly created company
       setFormData({ ...formData, company_id: response.data.id });
-      fetchCompanies();
+      await fetchCompanies();
       resetNewCompanyForm();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to create company');
