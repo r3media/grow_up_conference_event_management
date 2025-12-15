@@ -42,9 +42,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, MoreVertical, Pencil, Trash2, Search, Filter, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Trash2, Search, Filter, ArrowUp, ArrowDown, Camera, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
