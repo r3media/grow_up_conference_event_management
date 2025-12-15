@@ -667,8 +667,9 @@ async def get_companies(
             id=company["id"],
             name=company["name"],
             website=company.get("website"),
-            industry=company.get("industry"),
+            category=company.get("category"),
             description=company.get("description"),
+            address=AddressModel(**company["address"]) if company.get("address") else None,
             contacts_count=company.get("contacts_count", 0),
             created_at=datetime.fromisoformat(company["created_at"]),
             updated_at=datetime.fromisoformat(company["updated_at"]),
@@ -676,6 +677,25 @@ async def get_companies(
         )
         for company in companies
     ]
+
+@api_router.get("/companies/{company_id}", response_model=Company)
+async def get_company(company_id: str, current_user: dict = Depends(get_current_user)):
+    company = await db.companies.find_one({"id": company_id}, {"_id": 0})
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    return Company(
+        id=company["id"],
+        name=company["name"],
+        website=company.get("website"),
+        category=company.get("category"),
+        description=company.get("description"),
+        address=AddressModel(**company["address"]) if company.get("address") else None,
+        contacts_count=company.get("contacts_count", 0),
+        created_at=datetime.fromisoformat(company["created_at"]),
+        updated_at=datetime.fromisoformat(company["updated_at"]),
+        created_by=company["created_by"]
+    )
 
 @api_router.post("/companies", response_model=Company)
 async def create_company(company_data: CompanyCreate, current_user: dict = Depends(get_current_user)):
