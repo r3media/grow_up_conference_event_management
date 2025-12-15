@@ -1,0 +1,204 @@
+{
+  "identity": {
+    "name": "E1",
+    "role": "Anti-AI Designer",
+    "mission": "Create a vibrant, high-contrast conference management system that breaks the 'boring admin panel' stereotype.",
+    "principles": [
+      "Fusion over Imitation: Mix SaaS utility with Event Poster aesthetics.",
+      "Emotion First: The dashboard should feel 'alive' and 'happening', not static.",
+      "Content is King: Data is the star, but frame it beautifully.",
+      "Zoom In: Use bold metrics and large avatars.",
+      "Negative Space: Generous padding even in dense data views.",
+      "Contrast: High contrast text for readability against deep backgrounds."
+    ]
+  },
+  "typography": {
+    "fonts": {
+      "headings": {
+        "family": "Outfit, sans-serif",
+        "weights": ["500", "700"],
+        "usage": "All page titles, card headers, and major metrics."
+      },
+      "body": {
+        "family": "Manrope, sans-serif",
+        "weights": ["400", "500", "600"],
+        "usage": "General text, tables, form inputs, buttons."
+      },
+      "mono": {
+        "family": "JetBrains Mono, monospace",
+        "weights": ["400"],
+        "usage": "IDs, API keys, code snippets, technical data."
+      }
+    },
+    "installation": "Import fonts via Google Fonts in index.css: @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Manrope:wght@400;500;600&family=Outfit:wght@500;700&display=swap');"
+  },
+  "colors": {
+    "theme_strategy": "Vibrant Modern (Stellar Inspired)",
+    "palette": {
+      "light": {
+        "background": "210 40% 98%",
+        "foreground": "222 47% 11%",
+        "card": "0 0% 100%",
+        "card_foreground": "222 47% 11%",
+        "popover": "0 0% 100%",
+        "popover_foreground": "222 47% 11%",
+        "primary": "262 83% 58%",
+        "primary_foreground": "210 40% 98%",
+        "secondary": "150 100% 35%",
+        "secondary_foreground": "210 40% 98%",
+        "muted": "210 40% 96.1%",
+        "muted_foreground": "215.4 16.3% 46.9%",
+        "accent": "340 82% 52%",
+        "accent_foreground": "210 40% 98%",
+        "destructive": "0 84.2% 60.2%",
+        "destructive_foreground": "210 40% 98%",
+        "border": "214.3 31.8% 91.4%",
+        "input": "214.3 31.8% 91.4%",
+        "ring": "262 83% 58%"
+      },
+      "dark": {
+        "background": "222 47% 11%",
+        "foreground": "210 40% 98%",
+        "card": "217 33% 17%",
+        "card_foreground": "210 40% 98%",
+        "popover": "222 47% 11%",
+        "popover_foreground": "210 40% 98%",
+        "primary": "263 70% 50%",
+        "primary_foreground": "210 40% 98%",
+        "secondary": "160 84% 39%",
+        "secondary_foreground": "210 40% 98%",
+        "muted": "217 33% 17%",
+        "muted_foreground": "215 20.2% 65.1%",
+        "accent": "340 75% 55%",
+        "accent_foreground": "210 40% 98%",
+        "destructive": "0 62.8% 30.6%",
+        "destructive_foreground": "210 40% 98%",
+        "border": "217 33% 17%",
+        "input": "217 33% 17%",
+        "ring": "263 70% 50%"
+      }
+    },
+    "usage_rules": [
+      "Primary (Electric Purple): Main CTAs, active states, key brand moments.",
+      "Secondary (Vibrant Green): Success states, growth metrics, 'Go' actions.",
+      "Accent (Hot Pink/Rose): Alerts, notifications, 'New' badges.",
+      "Background: Deep Navy/Slate in dark mode, not pure black.",
+      "Gradients: Use subtle gradients on Primary buttons (Purple to Pink) for 'Vibrant' feel."
+    ]
+  },
+  "layout": {
+    "spacing_system": {
+      "base": "p-6",
+      "container_padding": "p-6 md:p-8 lg:p-12",
+      "section_gap": "gap-8",
+      "card_internal": "p-6"
+    },
+    "grid_strategy": "The Control Room Grid",
+    "grid_rules": [
+      "Base Grid: grid-cols-1 md:grid-cols-3 lg:grid-cols-4",
+      "Gap: gap-6",
+      "Summary Cards: col-span-1",
+      "Main Charts: col-span-2 row-span-2 or col-span-3",
+      "Lists/Feeds: col-span-1 row-span-2"
+    ],
+    "alignment": {
+      "general": "Left-aligned text for readability.",
+      "numbers": "Right-aligned or tabular nums for data.",
+      "headers": "Left-aligned with tight tracking."
+    }
+  },
+  "components": {
+    "cards": {
+      "style": "Flat background (Card color), 1px border (Border color).",
+      "hover": "hover:border-primary/50 transition-colors duration-300",
+      "header": "Border-b border-border/50 pb-4 mb-4"
+    },
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-md font-medium",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-md font-medium",
+      "outline": "border-2 border-primary text-primary hover:bg-primary/10 rounded-md font-medium"
+    },
+    "inputs": {
+      "style": "bg-input/20 border-input focus:border-primary focus:ring-1 focus:ring-primary rounded-md h-10"
+    },
+    "tables": {
+      "style": "w-full caption-bottom text-sm",
+      "header": "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+      "row": "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "Use backdrop-blur-md bg-background/80 for sticky headers and overlays.",
+    "gradients": "Use 'bg-gradient-to-r from-primary to-accent' for text-transparent-clip on Hero Headings.",
+    "shadows": "Use colored shadows for primary elements: shadow-[0_4px_14px_0_rgba(139,92,246,0.39)].",
+    "borders": "Use 'border-white/10' for subtle separation in dark mode."
+  },
+  "motion": {
+    "transitions": "transition-all duration-200 ease-in-out",
+    "hover_effects": "transform hover:-translate-y-1 hover:shadow-lg",
+    "loading": "Use skeleton loaders with 'animate-pulse' instead of spinners where possible."
+  },
+  "images": {
+    "strategy": "Use high-quality, relevant photography for 'human' touch in a data-heavy app.",
+    "sources": [
+      {
+        "category": "Speakers/People",
+        "urls": [
+          "https://images.unsplash.com/photo-1764874299006-bf4266427ec9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwxfHxjb25mZXJlbmNlJTIwc3BlYWtlciUyMHBvZGl1bXxlbnwwfHx8fDE3NjU4MzQwNjN8MA&ixlib=rb-4.1.0&q=85",
+          "https://images.unsplash.com/photo-1758507595623-811a2ea5cb7b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwyfHxjb25mZXJlbmNlJTIwc3BlYWtlciUyMHBvZGl1bXxlbnwwfHx8fDE3NjU4MzQwNjN8MA&ixlib=rb-4.1.0&q=85"
+        ],
+        "usage": "Speaker profiles, User avatars (crop to face)."
+      },
+      {
+        "category": "Crowd/Atmosphere",
+        "urls": [
+          "https://images.unsplash.com/photo-1760822402889-1317a4eb43c7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwxfHxleHBvJTIwY3Jvd2QlMjBidXN5fGVufDB8fHx8MTc2NTgzNDA2NHww&ixlib=rb-4.1.0&q=85",
+          "https://images.unsplash.com/photo-1706461225981-da309aecba87?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwyfHxleHBvJTIwY3Jvd2QlMjBidXN5fGVufDB8fHx8MTc2NTgzNDA2NHww&ixlib=rb-4.1.0&q=85"
+        ],
+        "usage": "Event cover images, Login page background (with overlay)."
+      },
+      {
+        "category": "Logos/Companies",
+        "urls": [
+          "https://images.unsplash.com/photo-1572949645843-4395e309f43a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwxfHx0ZWNoJTIwY29tcGFueSUyMGxvZ28lMjB3aGl0ZSUyMGJhY2tncm91bmR8ZW58MHx8fHwxNzY1ODM0MDY3fDA&ixlib=rb-4.1.0&q=85",
+          "https://images.unsplash.com/photo-1734349803289-d1af597fd3aa?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwyfHx0ZWNoJTIwY29tcGFueSUyMGxvZ28lMjB3aGl0ZSUyMGJhY2tncm91bmR8ZW58MHx8fHwxNzY1ODM0MDY3fDA&ixlib=rb-4.1.0&q=85"
+        ],
+        "usage": "Sponsor logos, Exhibitor logos."
+      }
+    ]
+  },
+  "instructions_to_main_agent": {
+    "general": "You are building a Conference Management Dashboard. It must look premium, vibrant, and modern. Do not build a boring gray admin panel.",
+    "setup": [
+      "Update /app/frontend/src/index.css with the provided color variables.",
+      "Install fonts in index.css.",
+      "Ensure all Shadcn components use the new 'radius' and color variables."
+    ],
+    "pages": {
+      "login": "Split screen. Left: 'Crowd/Atmosphere' image with heavy purple/blue overlay and branding. Right: Clean login form.",
+      "dashboard": "Use the 'Control Room Grid'. Top: 4 summary cards (Attendees, Revenue, Speakers, Exhibitors). Middle: Large 'Ticket Sales' chart (Area Chart) + 'Recent Registrations' list. Bottom: 'Upcoming Events' grid.",
+      "user_management": "Data table with 'Avatar' column, 'Role' badges (colored by role), and 'Actions' dropdown.",
+      "event_creation": "Multi-step wizard or long-form with sticky header. Use 'Card' components to group sections (Basic Info, Date/Time, Location)."
+    },
+    "components": {
+      "charts": "Use Recharts (via Shadcn Charts). Style them to match the theme (e.g., Purple lines, Green bars).",
+      "navigation": "Sidebar navigation. Dark background. Active item: 'bg-primary/10 text-primary border-r-2 border-primary'.",
+      "header": "Sticky top bar. Glassmorphism. Breadcrumbs on left, User Profile + Notifications on right."
+    },
+    "testing": "Add data-testid to all interactive elements (buttons, inputs, links) in kebab-case (e.g., 'login-submit-btn', 'event-create-input')."
+  },
+  "universal_guidelines": {
+    "avoid": [
+      "Generic centered layouts.",
+      "Default Shadcn slate colors without customization.",
+      "Gradients for text bodies (only headings).",
+      "Transition: all (use specific transitions)."
+    ],
+    "enforce": [
+      "Micro-interactions on hover.",
+      "Generous padding (p-6+).",
+      "Consistent border radius (rounded-md or rounded-lg).",
+      "Accessibility (contrast checks)."
+    ]
+  }
+}
