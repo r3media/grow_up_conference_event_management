@@ -49,10 +49,13 @@ const getAuthHeaders = () => ({
 
 export default function CompanyManagement() {
   const [companies, setCompanies] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     website: '',
@@ -62,7 +65,7 @@ export default function CompanyManagement() {
 
   useEffect(() => {
     fetchCompanies();
-  }, []);
+  }, [searchTerm]);
 
   const fetchCompanies = async () => {
     try {
