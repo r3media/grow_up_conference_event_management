@@ -66,6 +66,8 @@ export default function CompanyManagement() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
   const [formData, setFormData] = useState({
     name: '',
     website: '',
