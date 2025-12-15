@@ -79,12 +79,24 @@ export default function ContactManagement() {
 
   const fetchContacts = async () => {
     try {
-      const response = await axios.get(`${API}/contacts`, getAuthHeaders());
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      
+      const response = await axios.get(`${API}/contacts?${params.toString()}`, getAuthHeaders());
       setContacts(response.data);
     } catch (error) {
       toast.error('Failed to load contacts');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCompanies = async () => {
+    try {
+      const response = await axios.get(`${API}/companies`, getAuthHeaders());
+      setCompanies(response.data);
+    } catch (error) {
+      console.error('Failed to load companies');
     }
   };
 
