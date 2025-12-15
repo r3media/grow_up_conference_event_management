@@ -378,6 +378,18 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = 
         update_dict["name"] = user_data.name
     if user_data.role is not None:
         update_dict["role"] = user_data.role
+    if user_data.photo_url is not None:
+        update_dict["photo_url"] = user_data.photo_url
+    if user_data.mobile_phone is not None:
+        update_dict["mobile_phone"] = user_data.mobile_phone
+    if user_data.address is not None:
+        update_dict["address"] = user_data.address.model_dump()
+    if user_data.job_title is not None:
+        update_dict["job_title"] = user_data.job_title
+    if user_data.department is not None:
+        update_dict["department"] = user_data.department
+    if user_data.tags is not None:
+        update_dict["tags"] = user_data.tags
     if user_data.is_active is not None:
         update_dict["is_active"] = user_data.is_active
     if user_data.password is not None:
@@ -391,6 +403,12 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = 
         email=updated_user["email"],
         name=updated_user["name"],
         role=updated_user["role"],
+        photo_url=updated_user.get("photo_url"),
+        mobile_phone=updated_user.get("mobile_phone"),
+        address=AddressModel(**updated_user["address"]) if updated_user.get("address") else None,
+        job_title=updated_user.get("job_title"),
+        department=updated_user.get("department"),
+        tags=updated_user.get("tags", []),
         is_active=updated_user["is_active"],
         created_at=datetime.fromisoformat(updated_user["created_at"]),
         updated_at=datetime.fromisoformat(updated_user["updated_at"])
