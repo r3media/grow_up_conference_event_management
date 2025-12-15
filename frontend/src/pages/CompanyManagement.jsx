@@ -397,9 +397,39 @@ export default function CompanyManagement() {
             <Table data-testid="companies-table">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Company</TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 font-semibold -ml-3"
+                      onClick={() => {
+                        setSortBy('name');
+                        setSortOrder(sortBy === 'name' && sortOrder === 'asc' ? 'desc' : 'asc');
+                      }}
+                    >
+                      Company
+                      {sortBy === 'name' && (
+                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+                      )}
+                    </Button>
+                  </TableHead>
                   <TableHead>Website</TableHead>
-                  <TableHead>Category</TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 font-semibold -ml-3"
+                      onClick={() => {
+                        setSortBy('category');
+                        setSortOrder(sortBy === 'category' && sortOrder === 'asc' ? 'desc' : 'asc');
+                      }}
+                    >
+                      Category
+                      {sortBy === 'category' && (
+                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+                      )}
+                    </Button>
+                  </TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
