@@ -184,6 +184,9 @@ export default function UserManagement() {
           <DialogContent data-testid="user-dialog">
             <DialogHeader>
               <DialogTitle>{selectedUser ? 'Edit User' : 'Add New User'}</DialogTitle>
+              <DialogDescription>
+                {selectedUser ? 'Update user information and role assignment.' : 'Create a new user account with role and permissions.'}
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
