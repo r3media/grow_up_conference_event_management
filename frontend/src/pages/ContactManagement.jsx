@@ -169,6 +169,9 @@ export default function ContactManagement() {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="contact-dialog">
             <DialogHeader>
               <DialogTitle>{selectedContact ? 'Edit Contact' : 'Add New Contact'}</DialogTitle>
+              <DialogDescription>
+                {selectedContact ? 'Update contact details and information.' : 'Add a new contact to your conference database.'}
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
