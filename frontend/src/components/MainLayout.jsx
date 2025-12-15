@@ -6,6 +6,7 @@ import {
   Users, 
   UserCircle, 
   Building2,
+  Settings as SettingsIcon,
   LogOut,
   Menu,
   X
