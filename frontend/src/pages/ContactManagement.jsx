@@ -336,6 +336,75 @@ export default function ContactManagement() {
         </Dialog>
       </div>
 
+      {/* Quick Company Creation Dialog */}
+      <Dialog open={companyDialogOpen} onOpenChange={setCompanyDialogOpen}>
+        <DialogContent data-testid="quick-company-dialog">
+          <DialogHeader>
+            <DialogTitle>Create New Company</DialogTitle>
+            <DialogDescription>
+              Quickly add a new company to your database
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateCompany} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="company-name">Company Name *</Label>
+              <Input
+                id="company-name"
+                value={newCompanyData.name}
+                onChange={(e) => setNewCompanyData({ ...newCompanyData, name: e.target.value })}
+                required
+                data-testid="quick-company-name-input"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="company-website">Website</Label>
+                <Input
+                  id="company-website"
+                  type="url"
+                  value={newCompanyData.website}
+                  onChange={(e) => setNewCompanyData({ ...newCompanyData, website: e.target.value })}
+                  placeholder="https://example.com"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="company-industry">Industry</Label>
+                <Input
+                  id="company-industry"
+                  value={newCompanyData.industry}
+                  onChange={(e) => setNewCompanyData({ ...newCompanyData, industry: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => {
+                setCompanyDialogOpen(false);
+                resetNewCompanyForm();
+              }}>
+                Cancel
+              </Button>
+              <Button type="submit">Create Company</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Search */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Search by name, email, or position..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+              data-testid="contact-search-input"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>All Contacts ({contacts.length})</CardTitle>
