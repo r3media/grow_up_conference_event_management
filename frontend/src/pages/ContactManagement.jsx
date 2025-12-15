@@ -49,23 +49,33 @@ const getAuthHeaders = () => ({
 
 export default function ContactManagement() {
   const [contacts, setContacts] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    company: '',
+    company_id: '',
     position: '',
     tags: '',
     notes: '',
   });
+  const [newCompanyData, setNewCompanyData] = useState({
+    name: '',
+    website: '',
+    industry: '',
+    description: '',
+  });
 
   useEffect(() => {
     fetchContacts();
-  }, []);
+    fetchCompanies();
+  }, [searchTerm]);
 
   const fetchContacts = async () => {
     try {
