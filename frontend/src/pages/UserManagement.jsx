@@ -137,16 +137,24 @@ export default function UserManagement() {
     }
     
     try {
+      let userId;
       if (selectedUser) {
         const updateData = { ...submitData };
         if (!updateData.password) {
           delete updateData.password;
         }
         await axios.put(`${API}/users/${selectedUser.id}`, updateData, getAuthHeaders());
+        userId = selectedUser.id;
         toast.success('User updated successfully');
       } else {
-        await axios.post(`${API}/users`, submitData, getAuthHeaders());
+        const response = await axios.post(`${API}/users`, submitData, getAuthHeaders());
+        userId = response.data.id;
         toast.success('User created successfully');
+      }
+      
+      // Upload photo if selected
+      if (photoFile && userId) {
+        await uploadPhoto(userId);
       }
       
       setDialogOpen(false);
@@ -156,6 +164,59 @@ export default function UserManagement() {
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Operation failed');
     }
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size exceeds 5MB limit');
+        return;
+      }
+      setPhotoFile(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadPhoto = async (userId) => {
+    if (!photoFile) return;
+    
+    setUploadingPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', photoFile);
+      
+      await axios.post(
+        `${API}/users/${userId}/photo`,
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      toast.success('Photo uploaded successfully');
+    } catch (error) {
+      toast.error('Failed to upload photo');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleDeletePhoto = async (userId) => {
+    try {
+      await axios.delete(`${API}/users/${userId}/photo`, getAuthHeaders());
+      toast.success('Photo deleted successfully');
+      fetchUsers();
+    } catch (error) {
+      toast.error('Failed to delete photo');
+    }
+  };
+
+  const clearPhotoSelection = () => {
+    setPhotoFile(null);
+    setPhotoPreview(null);
   };
 
   const handleDelete = async () => {
