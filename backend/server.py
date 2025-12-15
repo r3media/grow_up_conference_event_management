@@ -491,6 +491,7 @@ async def get_contacts(
             position=contact.get("position"),
             tags=contact.get("tags", []),
             notes=contact.get("notes"),
+            photo_url=contact.get("photo_url"),
             created_at=datetime.fromisoformat(contact["created_at"]),
             updated_at=datetime.fromisoformat(contact["updated_at"]),
             created_by=contact["created_by"]
@@ -514,6 +515,7 @@ async def create_contact(contact_data: ContactCreate, current_user: dict = Depen
         "position": contact_data.position,
         "tags": contact_data.tags,
         "notes": contact_data.notes,
+        "photo_url": contact_data.photo_url,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "created_by": current_user["id"]
@@ -537,6 +539,7 @@ async def create_contact(contact_data: ContactCreate, current_user: dict = Depen
         position=contact_dict["position"],
         tags=contact_dict["tags"],
         notes=contact_dict["notes"],
+        photo_url=contact_dict["photo_url"],
         created_at=datetime.fromisoformat(contact_dict["created_at"]),
         updated_at=datetime.fromisoformat(contact_dict["updated_at"]),
         created_by=contact_dict["created_by"]
