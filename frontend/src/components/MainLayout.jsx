@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import GlobalSearch from './GlobalSearch';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
