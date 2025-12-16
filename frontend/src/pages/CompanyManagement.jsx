@@ -504,20 +504,44 @@ export default function CompanyManagement() {
         </Dialog>
       </div>
 
-      {/* Search and Column Customizer */}
+      {/* Search, Filters and Column Customizer */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search by company name or category..."
+                placeholder="Search by company name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
                 data-testid="company-search-input"
               />
             </div>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-[180px]" data-testid="company-category-filter">
+                <Filter className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.category_name}>{cat.category_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={exhibitHistoryFilter} onValueChange={setExhibitHistoryFilter}>
+              <SelectTrigger className="w-[200px]" data-testid="company-exhibit-filter">
+                <Filter className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Exhibit History" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Exhibits</SelectItem>
+                {exhibitHistoryOptions.map((opt) => (
+                  <SelectItem key={opt.id} value={opt.category_name}>{opt.category_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <ColumnCustomizer
               allColumns={ALL_COLUMNS}
               visibleColumns={visibleColumns}
