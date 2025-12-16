@@ -45,9 +45,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, MoreVertical, Pencil, Trash2, Building2, Search, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Building2, Search, ArrowUp, ArrowDown, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { ColumnCustomizer, useColumnPreferences } from '@/components/ColumnCustomizer';
+import { COUNTRIES, getProvincesForCountry, getProvinceLabel, getPostalCodeLabel, getPostalCodePlaceholder } from '@/lib/addressData';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -56,13 +58,12 @@ const getAuthHeaders = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
 });
 
-const provinces = ['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'];
-
 // Define all available columns
 const ALL_COLUMNS = [
   { key: 'name', label: 'Company Name', sortable: true },
   { key: 'website', label: 'Website', sortable: true },
   { key: 'category', label: 'Category', sortable: true },
+  { key: 'exhibit_history', label: 'Exhibit History', sortable: false },
   { key: 'city', label: 'City', sortable: true },
   { key: 'province', label: 'Province', sortable: true },
   { key: 'country', label: 'Country', sortable: true },
