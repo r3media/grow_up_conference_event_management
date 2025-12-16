@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { InlineEdit, InlineEditBlock } from '@/components/InlineEdit';
 import {
   Table,
   TableBody,
@@ -38,7 +40,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Globe, Building2, MapPin, Mail, Phone, Pencil, Plus, MoreVertical, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -49,11 +50,14 @@ const getAuthHeaders = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
 });
 
+const provinces = ['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'];
+
 export default function CompanyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [company, setCompany] = useState(null);
   const [contacts, setContacts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -70,6 +74,7 @@ export default function CompanyDetail() {
   useEffect(() => {
     fetchCompanyDetails();
     fetchCompanyContacts();
+    fetchCategories();
   }, [id]);
 
   const fetchCompanyDetails = async () => {
@@ -90,6 +95,25 @@ export default function CompanyDetail() {
       setContacts(response.data);
     } catch (error) {
       console.error('Failed to load contacts');
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${API}/settings/categories?category_type=business_category`, getAuthHeaders());
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Failed to load categories');
+    }
+  };
+
+  const updateCompany = async (updates) => {
+    try {
+      await axios.put(`${API}/companies/${id}`, updates, getAuthHeaders());
+      toast.success('Company updated');
+      fetchCompanyDetails();
+    } catch (error) {
+      toast.error('Failed to update company');
     }
   };
 
@@ -180,29 +204,23 @@ export default function CompanyDetail() {
   return (
     <div className="space-y-6" data-testid="company-detail">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate('/companies')}
-            data-testid="back-button"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/companies')} data-testid="back-button">
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+        <div className="flex items-center gap-4 flex-1">
+          <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Building2 className="w-8 h-8 text-primary" />
+          </div>
           <div>
-            <h1 className="text-4xl font-bold mb-2">{company.name}</h1>
-            <p className="text-muted-foreground">Company Details</p>
+            <h1 className="text-4xl font-bold">{company.name}</h1>
+            {company.category && (
+              <span className="px-3 py-1 rounded-full text-sm bg-secondary/10 text-secondary font-medium mt-2 inline-block">
+                {company.category}
+              </span>
+            )}
           </div>
         </div>
-        <Button
-          onClick={() => navigate(`/companies/${id}/edit`)}
-          className="gap-2"
-          data-testid="edit-company-button"
-        >
-          <Pencil className="w-4 h-4" />
-          Edit Company
-        </Button>
       </div>
 
       {/* Company Information */}
@@ -217,63 +235,62 @@ export default function CompanyDetail() {
                 <label className="text-sm font-medium text-muted-foreground">Company Name</label>
                 <div className="flex items-center gap-2 mt-1">
                   <Building2 className="w-4 h-4 text-muted-foreground" />
-                  <p className="font-medium">{company.name}</p>
+                  <InlineEdit
+                    value={company.name}
+                    onSave={(v) => updateCompany({ name: v })}
+                    placeholder="Enter company name"
+                  />
                 </div>
               </div>
               
-              {company.website && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Website</label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Globe className="w-4 h-4 text-muted-foreground" />
-                    <a
-                      href={company.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      {company.website}
-                    </a>
-                  </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Website</label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Globe className="w-4 h-4 text-muted-foreground" />
+                  <InlineEdit
+                    value={company.website}
+                    onSave={(v) => updateCompany({ website: v })}
+                    type="url"
+                    placeholder="https://example.com"
+                  />
                 </div>
-              )}
+              </div>
             </div>
 
-            {company.category && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Category</label>
-                <div className="mt-1">
-                  <span className="px-3 py-1 rounded-full text-sm bg-secondary/10 text-secondary font-medium">
-                    {company.category}
-                  </span>
-                </div>
-              </div>
-            )}
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Category</label>
+              <InlineEdit
+                value={company.category}
+                onSave={(v) => updateCompany({ category: v })}
+                type="select"
+                options={categories.map(c => ({ value: c.category_name, label: c.category_name }))}
+                placeholder="Select category"
+              />
+            </div>
 
-            {company.description && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Description</label>
-                <p className="mt-1 text-sm">{company.description}</p>
-              </div>
-            )}
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Description</label>
+              <InlineEdit
+                value={company.description}
+                onSave={(v) => updateCompany({ description: v })}
+                placeholder="Add company description..."
+                multiline
+              />
+            </div>
 
-            {company.address && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Address</label>
-                <div className="flex items-start gap-2 mt-1">
-                  <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
-                  <div className="text-sm">
-                    {company.address.street && <div>{company.address.street}</div>}
-                    <div>
-                      {company.address.city && `${company.address.city}, `}
-                      {company.address.province && `${company.address.province} `}
-                      {company.address.postal_code}
-                    </div>
-                    <div>{company.address.country}</div>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Address Block */}
+            <div className="border-t pt-4">
+              <InlineEditBlock
+                title="Address"
+                fields={[
+                  { key: 'street', label: 'Street', value: company.address?.street, placeholder: 'Street address' },
+                  { key: 'city', label: 'City', value: company.address?.city, placeholder: 'City' },
+                  { key: 'province', label: 'Province', value: company.address?.province, type: 'select', options: provinces.map(p => ({ value: p, label: p })) },
+                  { key: 'postal_code', label: 'Postal Code', value: company.address?.postal_code, placeholder: 'A1A 1A1' },
+                ]}
+                onSave={(values) => updateCompany({ address: { ...company.address, ...values, country: 'Canada' } })}
+              />
+            </div>
           </CardContent>
         </Card>
 
@@ -296,6 +313,16 @@ export default function CompanyDetail() {
                   day: 'numeric'
                 })}
               </p>
+            </div>
+
+            {/* Placeholder for future stats */}
+            <div className="border-t pt-4 space-y-3">
+              <div className="text-sm text-muted-foreground">Coming soon:</div>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>• Total orders</p>
+                <p>• Lifetime value</p>
+                <p>• Events participated</p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -441,7 +468,7 @@ export default function CompanyDetail() {
                           </AvatarFallback>
                         </Avatar>
                         <button
-                          onClick={() => openEditContactDialog(contact)}
+                          onClick={() => navigate(`/contacts/${contact.id}`)}
                           className="font-medium text-primary hover:underline text-left"
                           data-testid={`company-contact-name-link-${contact.id}`}
                         >
