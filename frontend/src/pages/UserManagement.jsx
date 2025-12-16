@@ -327,6 +327,8 @@ export default function UserManagement() {
 
   const getCellValue = (user, key) => {
     switch (key) {
+      case 'email':
+        return <EmailLink email={user.email} />;
       case 'city':
         return user.address?.city || '-';
       case 'province':
