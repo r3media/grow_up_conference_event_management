@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building2, Users, Calendar, Package, ChevronRight, Tag } from 'lucide-react';
+import { Building2, Users, Calendar, Package, ChevronRight, Tag, Mail } from 'lucide-react';
+import EmailSettings from '@/components/settings/EmailSettings';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('company');
@@ -36,7 +37,7 @@ export default function Settings() {
       <Card>
         <CardContent className="pt-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+            <TabsList className="grid grid-cols-5 w-full max-w-3xl">
               <TabsTrigger value="company" className="gap-2" data-testid="tab-company-settings">
                 <Building2 className="w-4 h-4" />
                 Company
@@ -44,6 +45,10 @@ export default function Settings() {
               <TabsTrigger value="user" className="gap-2" data-testid="tab-user-settings">
                 <Users className="w-4 h-4" />
                 User
+              </TabsTrigger>
+              <TabsTrigger value="email" className="gap-2" data-testid="tab-email-settings">
+                <Mail className="w-4 h-4" />
+                Email
               </TabsTrigger>
               <TabsTrigger value="event" className="gap-2" data-testid="tab-event-settings">
                 <Calendar className="w-4 h-4" />
@@ -81,6 +86,10 @@ export default function Settings() {
                   onClick={() => navigate('/settings/categories/department')}
                 />
               </div>
+            </TabsContent>
+
+            <TabsContent value="email" className="mt-6">
+              <EmailSettings />
             </TabsContent>
 
             <TabsContent value="event" className="mt-6">
