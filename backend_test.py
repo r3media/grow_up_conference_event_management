@@ -256,6 +256,14 @@ class ConferenceAPITester:
                 f"contacts/{contact_id}",
                 200
             )
+        
+        # Clean up test company
+        self.run_test(
+            "Delete test company for contact",
+            "DELETE",
+            f"companies/{company_id}",
+            200
+        )
 
     def test_company_management(self):
         """Test company management endpoints"""
