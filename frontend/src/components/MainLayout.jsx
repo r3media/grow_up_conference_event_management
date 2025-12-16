@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import GlobalSearch from './GlobalSearch';
+import ThemeSwitcher from './ThemeSwitcher';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -158,6 +159,9 @@ export default function MainLayout({ children }) {
               <GlobalSearch />
             </div>
             <div className="flex-1 md:hidden" />
+
+            {/* Theme Switcher */}
+            <ThemeSwitcher />
 
             {/* User menu */}
             <DropdownMenu>
