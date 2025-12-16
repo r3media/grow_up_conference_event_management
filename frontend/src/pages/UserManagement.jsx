@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -46,6 +48,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, MoreVertical, Pencil, Trash2, Search, Filter, ArrowUp, ArrowDown, Camera, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { ColumnCustomizer, useColumnPreferences } from '@/components/ColumnCustomizer';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -57,7 +60,26 @@ const getAuthHeaders = () => ({
 const roles = ['Super Admin', 'Event Manager', 'Conference Manager', 'Registration Manager', 'Staff'];
 const provinces = ['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'];
 
+// Define all available columns
+const ALL_COLUMNS = [
+  { key: 'name', label: 'Name', sortable: true },
+  { key: 'email', label: 'Email', sortable: true },
+  { key: 'role', label: 'Role', sortable: true },
+  { key: 'department', label: 'Department', sortable: true },
+  { key: 'job_title', label: 'Job Title', sortable: true },
+  { key: 'mobile_phone', label: 'Mobile Phone', sortable: false },
+  { key: 'city', label: 'City', sortable: true },
+  { key: 'province', label: 'Province', sortable: true },
+  { key: 'street', label: 'Street', sortable: false },
+  { key: 'postal_code', label: 'Postal Code', sortable: false },
+  { key: 'tags', label: 'Tags', sortable: false },
+  { key: 'is_active', label: 'Status', sortable: true },
+];
+
+const DEFAULT_COLUMNS = ['name', 'email', 'role', 'department', 'is_active'];
+
 export default function UserManagement() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -91,6 +113,11 @@ export default function UserManagement() {
     is_active: true,
   });
 
+  const { visibleColumns, toggleColumn, resetColumns } = useColumnPreferences(
+    'user_columns',
+    DEFAULT_COLUMNS
+  );
+
   useEffect(() => {
     fetchUsers();
     fetchDepartments();
@@ -116,8 +143,9 @@ export default function UserManagement() {
 
   const fetchDepartments = async () => {
     try {
-      const response = await axios.get(`${API}/departments`, getAuthHeaders());
-      setDepartments(response.data);
+      const response = await axios.get(`${API}/users`, getAuthHeaders());
+      const depts = [...new Set(response.data.map(u => u.department).filter(Boolean))];
+      setDepartments(depts);
     } catch (error) {
       console.error('Failed to load departments');
     }
@@ -131,7 +159,6 @@ export default function UserManagement() {
       tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
     };
 
-    // Clean up empty address
     if (!submitData.address.street && !submitData.address.city && !submitData.address.postal_code) {
       submitData.address = null;
     }
@@ -152,7 +179,6 @@ export default function UserManagement() {
         toast.success('User created successfully');
       }
       
-      // Upload photo if selected
       if (photoFile && userId) {
         await uploadPhoto(userId);
       }
@@ -204,16 +230,6 @@ export default function UserManagement() {
     }
   };
 
-  const handleDeletePhoto = async (userId) => {
-    try {
-      await axios.delete(`${API}/users/${userId}/photo`, getAuthHeaders());
-      toast.success('Photo deleted successfully');
-      fetchUsers();
-    } catch (error) {
-      toast.error('Failed to delete photo');
-    }
-  };
-
   const clearPhotoSelection = () => {
     setPhotoFile(null);
     setPhotoPreview(null);
@@ -229,7 +245,7 @@ export default function UserManagement() {
       setSelectedUser(null);
       fetchUsers();
     } catch (error) {
-      toast.error('Failed to delete user');
+      toast.error(error.response?.data?.detail || 'Failed to delete user');
     }
   };
 
@@ -287,6 +303,15 @@ export default function UserManagement() {
     setDeleteDialogOpen(true);
   };
 
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
+
   const getRoleBadgeColor = (role) => {
     const colors = {
       'Super Admin': 'bg-accent text-accent-foreground',
@@ -298,12 +323,77 @@ export default function UserManagement() {
     return colors[role] || 'bg-muted text-muted-foreground';
   };
 
+  const getCellValue = (user, key) => {
+    switch (key) {
+      case 'city':
+        return user.address?.city || '-';
+      case 'province':
+        return user.address?.province || '-';
+      case 'street':
+        return user.address?.street || '-';
+      case 'postal_code':
+        return user.address?.postal_code || '-';
+      case 'role':
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
+            {user.role}
+          </span>
+        );
+      case 'is_active':
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            user.is_active ? 'bg-secondary/20 text-secondary' : 'bg-destructive/20 text-destructive'
+          }`}>
+            {user.is_active ? 'Active' : 'Inactive'}
+          </span>
+        );
+      case 'tags':
+        return user.tags?.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {user.tags.slice(0, 2).map((tag, i) => (
+              <span key={i} className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">
+                {tag}
+              </span>
+            ))}
+            {user.tags.length > 2 && (
+              <span className="text-xs text-muted-foreground">+{user.tags.length - 2}</span>
+            )}
+          </div>
+        ) : '-';
+      default:
+        return user[key] || '-';
+    }
+  };
+
+  const SortableHeader = ({ column, children }) => {
+    const colDef = ALL_COLUMNS.find(c => c.key === column);
+    if (!colDef?.sortable) {
+      return <TableHead>{children}</TableHead>;
+    }
+
+    return (
+      <TableHead>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 font-semibold -ml-3"
+          onClick={() => handleSort(column)}
+        >
+          {children}
+          {sortBy === column && (
+            sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+          )}
+        </Button>
+      </TableHead>
+    );
+  };
+
   return (
     <div className="space-y-6" data-testid="user-management">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold mb-2">User Management</h1>
-          <p className="text-muted-foreground">Manage team members and their permissions</p>
+          <h1 className="text-4xl font-bold mb-2">Users</h1>
+          <p className="text-muted-foreground">Manage staff accounts and permissions</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
@@ -315,11 +405,11 @@ export default function UserManagement() {
               Add User
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" data-testid="user-dialog">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="user-dialog">
             <DialogHeader>
               <DialogTitle>{selectedUser ? 'Edit User' : 'Add New User'}</DialogTitle>
               <DialogDescription>
-                {selectedUser ? 'Update user information and role assignment.' : 'Create a new user account with role and permissions.'}
+                {selectedUser ? 'Update user information and access level.' : 'Create a new staff member account.'}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -389,7 +479,33 @@ export default function UserManagement() {
                   />
                 </div>
               </div>
-
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">{selectedUser ? 'New Password' : 'Password *'}</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required={!selectedUser}
+                    placeholder={selectedUser ? 'Leave blank to keep current' : ''}
+                    data-testid="user-password-input"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role *</Label>
+                  <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })} data-testid="user-role-select">
+                    <SelectTrigger data-testid="user-role-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roles.map((role) => (
+                        <SelectItem key={role} value={role}>{role}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="mobile_phone">Mobile Phone</Label>
@@ -397,28 +513,9 @@ export default function UserManagement() {
                     id="mobile_phone"
                     value={formData.mobile_phone}
                     onChange={(e) => setFormData({ ...formData, mobile_phone: e.target.value })}
-                    placeholder="+1 (555) 123-4567"
                     data-testid="user-mobile-input"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role *</Label>
-                  <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                    <SelectTrigger data-testid="user-role-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {roles.map((role) => (
-                        <SelectItem key={role} value={role}>
-                          {role}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="job_title">Job Title</Label>
                   <Input
@@ -428,6 +525,8 @@ export default function UserManagement() {
                     data-testid="user-job-title-input"
                   />
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="department">Department</Label>
                   <Input
@@ -437,17 +536,16 @@ export default function UserManagement() {
                     data-testid="user-department-input"
                   />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
-                <Input
-                  id="tags"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  placeholder="vip, speaker, organizer"
-                  data-testid="user-tags-input"
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="tags">Tags (comma-separated)</Label>
+                  <Input
+                    id="tags"
+                    value={formData.tags}
+                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                    placeholder="admin, manager"
+                    data-testid="user-tags-input"
+                  />
+                </div>
               </div>
 
               <div className="border-t pt-4">
@@ -501,39 +599,37 @@ export default function UserManagement() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password {selectedUser && '(leave blank to keep current)'}</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required={!selectedUser}
-                  data-testid="user-password-input"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" data-testid="user-submit-button">
-                  {selectedUser ? 'Update' : 'Create'}
-                </Button>
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                    data-testid="user-active-switch"
+                  />
+                  <Label htmlFor="is_active">Active account</Label>
+                </div>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" data-testid="user-submit-button">
+                    {selectedUser ? 'Update' : 'Create'}
+                  </Button>
+                </div>
               </div>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Search and Filter */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-2 relative">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search by name, email, or job title..."
+                placeholder="Search by name, email, or department..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -541,37 +637,23 @@ export default function UserManagement() {
               />
             </div>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger data-testid="user-role-filter">
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4" />
-                  <SelectValue placeholder="All Roles" />
-                </div>
+              <SelectTrigger className="w-[180px]" data-testid="user-role-filter">
+                <Filter className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Roles</SelectItem>
                 {roles.map((role) => (
-                  <SelectItem key={role} value={role}>
-                    {role}
-                  </SelectItem>
+                  <SelectItem key={role} value={role}>{role}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-              <SelectTrigger data-testid="user-department-filter">
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4" />
-                  <SelectValue placeholder="All Departments" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept} value={dept}>
-                    {dept}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <ColumnCustomizer
+              allColumns={ALL_COLUMNS}
+              visibleColumns={visibleColumns}
+              onToggle={toggleColumn}
+              onReset={resetColumns}
+            />
           </div>
         </CardContent>
       </Card>
@@ -589,129 +671,49 @@ export default function UserManagement() {
             <Table data-testid="users-table">
               <TableHeader>
                 <TableRow>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 font-semibold -ml-3"
-                      onClick={() => {
-                        setRoleFilter('');
-                        setDepartmentFilter('');
-                        const newOrder = sortBy === 'name' && sortOrder === 'asc' ? 'desc' : 'asc';
-                        setSortBy('name');
-                        setSortOrder(newOrder);
-                      }}
-                    >
-                      User
-                      {sortBy === 'name' && (
-                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 font-semibold -ml-3"
-                      onClick={() => {
-                        setRoleFilter('');
-                        setDepartmentFilter('');
-                        const newOrder = sortBy === 'email' && sortOrder === 'asc' ? 'desc' : 'asc';
-                        setSortBy('email');
-                        setSortOrder(newOrder);
-                      }}
-                    >
-                      Email
-                      {sortBy === 'email' && (
-                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 font-semibold -ml-3"
-                      onClick={() => {
-                        setRoleFilter('');
-                        setDepartmentFilter('');
-                        const newOrder = sortBy === 'department' && sortOrder === 'asc' ? 'desc' : 'asc';
-                        setSortBy('department');
-                        setSortOrder(newOrder);
-                      }}
-                    >
-                      Department
-                      {sortBy === 'department' && (
-                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 font-semibold -ml-3"
-                      onClick={() => {
-                        setRoleFilter('');
-                        setDepartmentFilter('');
-                        const newOrder = sortBy === 'job_title' && sortOrder === 'asc' ? 'desc' : 'asc';
-                        setSortBy('job_title');
-                        setSortOrder(newOrder);
-                      }}
-                    >
-                      Job Title
-                      {sortBy === 'job_title' && (
-                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableHead>
-                  <TableHead>Status</TableHead>
+                  {visibleColumns.includes('name') && (
+                    <SortableHeader column="name">Name</SortableHeader>
+                  )}
+                  {visibleColumns.filter(c => c !== 'name').map((col) => (
+                    <SortableHeader key={col} column={col}>
+                      {ALL_COLUMNS.find(c => c.key === col)?.label || col}
+                    </SortableHeader>
+                  ))}
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.map((user) => (
-                  <TableRow key={user.id} data-testid={`user-row-${user.id}`}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          {user.photo_url ? (
-                            <AvatarImage src={`${BACKEND_URL}${user.photo_url}`} alt={user.name} />
-                          ) : null}
-                          <AvatarFallback className="bg-primary text-primary-foreground">
-                            {user.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <button
-                            onClick={() => openEditDialog(user)}
-                            className="font-medium text-primary hover:underline text-left"
-                            data-testid={`user-name-link-${user.id}`}
-                          >
-                            {user.name}
-                          </button>
-                          {user.mobile_phone && (
-                            <div className="text-xs text-muted-foreground">{user.mobile_phone}</div>
-                          )}
+                <TableRow key={user.id} data-testid={`user-row-${user.id}`}>
+                    {visibleColumns.includes('name') && (
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            {user.photo_url ? (
+                              <AvatarImage src={`${BACKEND_URL}${user.photo_url}`} alt={user.name} />
+                            ) : null}
+                            <AvatarFallback className="bg-primary text-primary-foreground">
+                              {user.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <button
+                              onClick={() => navigate(`/users/${user.id}`)}
+                              className="font-medium text-primary hover:underline text-left"
+                              data-testid={`user-name-link-${user.id}`}
+                            >
+                              {user.name}
+                            </button>
+                            {user.mobile_phone && (
+                              <div className="text-xs text-muted-foreground">{user.mobile_phone}</div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">{user.email}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
-                        {user.role}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-sm">{user.department || '-'}</TableCell>
-                    <TableCell className="text-sm">{user.job_title || '-'}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.is_active ? 'bg-secondary/20 text-secondary' : 'bg-destructive/20 text-destructive'
-                      }`}>
-                        {user.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                    </TableCell>
+                      </TableCell>
+                    )}
+                    {visibleColumns.filter(c => c !== 'name').map((col) => (
+                      <TableCell key={col}>{getCellValue(user, col)}</TableCell>
+                    ))}
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -746,7 +748,7 @@ export default function UserManagement() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the user <strong>{selectedUser?.name}</strong>.
+              This will permanently delete the user account for <strong>{selectedUser?.name}</strong>.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
