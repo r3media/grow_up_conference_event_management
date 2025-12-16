@@ -286,9 +286,10 @@ export default function EmailSettings() {
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap line-clamp-3">
-                          {signature.content}
-                        </p>
+                        <div 
+                          className="text-sm text-muted-foreground mt-2 prose prose-sm dark:prose-invert max-w-none line-clamp-3"
+                          dangerouslySetInnerHTML={{ __html: signature.content }}
+                        />
                       </div>
                       <div className="flex items-center gap-2 ml-4">
                         <Button
