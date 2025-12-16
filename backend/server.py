@@ -710,8 +710,17 @@ async def get_companies(
     # Sorting
     sort_direction = 1 if sort_order == "asc" else -1
     companies = await db.companies.find(query, {"_id": 0}).sort(sort_by, sort_direction).to_list(1000)
-    return [
-        Company(
+    
+    # Get sales rep names
+    result = []
+    for company in companies:
+        sales_rep_name = None
+        if company.get("sales_rep_id"):
+            sales_rep = await db.users.find_one({"id": company["sales_rep_id"]}, {"_id": 0, "name": 1})
+            if sales_rep:
+                sales_rep_name = sales_rep["name"]
+        
+        result.append(Company(
             id=company["id"],
             name=company["name"],
             website=company.get("website"),
@@ -719,13 +728,14 @@ async def get_companies(
             description=company.get("description"),
             address=AddressModel(**company["address"]) if company.get("address") else None,
             exhibit_history=company.get("exhibit_history", []),
+            sales_rep_id=company.get("sales_rep_id"),
+            sales_rep_name=sales_rep_name,
             contacts_count=company.get("contacts_count", 0),
             created_at=datetime.fromisoformat(company["created_at"]),
             updated_at=datetime.fromisoformat(company["updated_at"]),
             created_by=company["created_by"]
-        )
-        for company in companies
-    ]
+        ))
+    return result
 
 @api_router.get("/companies/{company_id}", response_model=Company)
 async def get_company(company_id: str, current_user: dict = Depends(get_current_user)):
