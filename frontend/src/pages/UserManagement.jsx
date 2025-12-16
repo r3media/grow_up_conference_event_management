@@ -49,6 +49,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, MoreVertical, Pencil, Trash2, Search, Filter, ArrowUp, ArrowDown, Camera, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { ColumnCustomizer, useColumnPreferences } from '@/components/ColumnCustomizer';
+import { COUNTRIES, getProvincesForCountry, getProvinceLabel, getPostalCodeLabel, getPostalCodePlaceholder } from '@/lib/addressData';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -58,7 +59,6 @@ const getAuthHeaders = () => ({
 });
 
 const roles = ['Super Admin', 'Event Manager', 'Conference Manager', 'Registration Manager', 'Staff'];
-const provinces = ['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'];
 
 // Define all available columns
 const ALL_COLUMNS = [
