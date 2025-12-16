@@ -197,6 +197,7 @@ export default function CompanyManagement() {
       website: '',
       category: '',
       description: '',
+      exhibit_history: [],
       address: {
         street: '',
         city: '',
