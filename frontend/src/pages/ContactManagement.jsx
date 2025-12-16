@@ -133,12 +133,20 @@ export default function ContactManagement() {
     };
     
     try {
+      let contactId;
       if (selectedContact) {
         await axios.put(`${API}/contacts/${selectedContact.id}`, submitData, getAuthHeaders());
+        contactId = selectedContact.id;
         toast.success('Contact updated successfully');
       } else {
-        await axios.post(`${API}/contacts`, submitData, getAuthHeaders());
+        const response = await axios.post(`${API}/contacts`, submitData, getAuthHeaders());
+        contactId = response.data.id;
         toast.success('Contact created successfully');
+      }
+      
+      // Upload photo if selected
+      if (photoFile && contactId) {
+        await uploadPhoto(contactId);
       }
       
       setDialogOpen(false);
@@ -148,6 +156,49 @@ export default function ContactManagement() {
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Operation failed');
     }
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size exceeds 5MB limit');
+        return;
+      }
+      setPhotoFile(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadPhoto = async (contactId) => {
+    if (!photoFile) return;
+    
+    setUploadingPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', photoFile);
+      
+      await axios.post(
+        `${API}/contacts/${contactId}/photo`,
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      toast.success('Photo uploaded successfully');
+    } catch (error) {
+      toast.error('Failed to upload photo');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const clearPhotoSelection = () => {
+    setPhotoFile(null);
+    setPhotoPreview(null);
   };
 
   const handleCreateCompany = async (e) => {
