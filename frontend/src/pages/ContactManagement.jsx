@@ -243,6 +243,8 @@ export default function ContactManagement() {
       notes: '',
     });
     setSelectedContact(null);
+    setPhotoFile(null);
+    setPhotoPreview(null);
   };
 
   const resetNewCompanyForm = () => {
@@ -265,6 +267,8 @@ export default function ContactManagement() {
       tags: contact.tags?.join(', ') || '',
       notes: contact.notes || '',
     });
+    setPhotoFile(null);
+    setPhotoPreview(contact.photo_url ? `${BACKEND_URL}${contact.photo_url}` : null);
     setDialogOpen(true);
   };
 
