@@ -52,6 +52,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Plus, Pencil, Trash2, Mail, Phone, Building2, Search, ArrowUp, ArrowDown, Camera, X, Check, ChevronsUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { ColumnCustomizer, useColumnPreferences } from '@/components/ColumnCustomizer';
