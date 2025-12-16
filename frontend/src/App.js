@@ -116,6 +116,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/settings/categories/department"
+            element={
+              <ProtectedRoute>
+                <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" />
