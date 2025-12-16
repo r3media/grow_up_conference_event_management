@@ -157,6 +157,7 @@ class Contact(ContactBase):
     model_config = ConfigDict(extra="ignore")
     id: str
     company_name: Optional[str] = None  # Populated from company lookup
+    address: Optional[AddressModel] = None
     created_at: datetime
     updated_at: datetime
     created_by: str
