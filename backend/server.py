@@ -218,6 +218,79 @@ class StatsResponse(BaseModel):
     total_companies: int
     active_events: int
 
+# Email Models
+class EmailTemplateBase(BaseModel):
+    name: str
+    subject: str
+    body: str
+    is_active: bool = True
+
+class EmailTemplateCreate(EmailTemplateBase):
+    pass
+
+class EmailTemplateUpdate(BaseModel):
+    name: Optional[str] = None
+    subject: Optional[str] = None
+    body: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class EmailTemplate(EmailTemplateBase):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    created_at: datetime
+    updated_at: datetime
+    created_by: str
+
+class EmailSignatureBase(BaseModel):
+    name: str
+    content: str
+    is_default: bool = False
+
+class EmailSignatureCreate(EmailSignatureBase):
+    pass
+
+class EmailSignatureUpdate(BaseModel):
+    name: Optional[str] = None
+    content: Optional[str] = None
+    is_default: Optional[bool] = None
+
+class EmailSignature(EmailSignatureBase):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    user_id: str
+    created_at: datetime
+    updated_at: datetime
+
+class EmailAttachment(BaseModel):
+    filename: str
+    file_url: str
+    file_size: int
+    mime_type: str
+
+class EmailBase(BaseModel):
+    to_addresses: List[str]
+    cc_addresses: List[str] = []
+    bcc_addresses: List[str] = []
+    subject: str
+    body: str
+    priority: str = "normal"  # low, normal, high
+    template_id: Optional[str] = None
+    signature_id: Optional[str] = None
+
+class EmailCreate(EmailBase):
+    attachments: List[str] = []  # List of attachment IDs
+
+class Email(EmailBase):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    status: str = "draft"  # draft, sent, failed
+    sent_at: Optional[datetime] = None
+    attachments: List[EmailAttachment] = []
+    created_at: datetime
+    updated_at: datetime
+    created_by: str
+    created_by_name: Optional[str] = None
+
 # Authentication Routes
 @api_router.post("/auth/register", response_model=User)
 async def register(user_data: UserCreate):
