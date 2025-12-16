@@ -302,6 +302,49 @@ export default function ContactManagement() {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Photo Upload Section */}
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Avatar className="w-16 h-16">
+                    {photoPreview ? (
+                      <AvatarImage src={photoPreview} alt="Preview" />
+                    ) : (
+                      <AvatarFallback className="bg-secondary text-secondary-foreground text-lg">
+                        {formData.name ? formData.name.charAt(0).toUpperCase() : '?'}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  {photoPreview && (
+                    <button
+                      type="button"
+                      onClick={clearPhotoSelection}
+                      className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/80"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <Label htmlFor="contact-photo" className="cursor-pointer">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                      <Camera className="w-4 h-4" />
+                      <span>{selectedContact?.photo_url || photoFile ? 'Change Photo' : 'Upload Photo'}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      JPG, PNG, GIF or WebP. Max 5MB.
+                    </p>
+                  </Label>
+                  <Input
+                    id="contact-photo"
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handlePhotoChange}
+                    className="hidden"
+                    data-testid="contact-photo-input"
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name *</Label>
