@@ -684,6 +684,8 @@ async def delete_contact(contact_id: str, current_user: dict = Depends(get_curre
 @api_router.get("/companies", response_model=List[Company])
 async def get_companies(
     search: Optional[str] = None,
+    category: Optional[str] = None,
+    exhibit_history: Optional[str] = None,
     sort_by: Optional[str] = "name",
     sort_order: Optional[str] = "asc",
     current_user: dict = Depends(get_current_user)
@@ -696,6 +698,12 @@ async def get_companies(
             {"category": {"$regex": search, "$options": "i"}}
         ]
     
+    if category and category != "all":
+        query["category"] = category
+    
+    if exhibit_history and exhibit_history != "all":
+        query["exhibit_history"] = exhibit_history
+    
     # Sorting
     sort_direction = 1 if sort_order == "asc" else -1
     companies = await db.companies.find(query, {"_id": 0}).sort(sort_by, sort_direction).to_list(1000)
@@ -707,6 +715,7 @@ async def get_companies(
             category=company.get("category"),
             description=company.get("description"),
             address=AddressModel(**company["address"]) if company.get("address") else None,
+            exhibit_history=company.get("exhibit_history", []),
             contacts_count=company.get("contacts_count", 0),
             created_at=datetime.fromisoformat(company["created_at"]),
             updated_at=datetime.fromisoformat(company["updated_at"]),
