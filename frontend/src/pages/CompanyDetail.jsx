@@ -58,6 +58,7 @@ export default function CompanyDetail() {
   const [company, setCompany] = useState(null);
   const [contacts, setContacts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [exhibitHistoryOptions, setExhibitHistoryOptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -75,6 +76,7 @@ export default function CompanyDetail() {
     fetchCompanyDetails();
     fetchCompanyContacts();
     fetchCategories();
+    fetchExhibitHistoryOptions();
   }, [id]);
 
   const fetchCompanyDetails = async () => {
