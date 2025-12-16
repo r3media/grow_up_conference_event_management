@@ -108,6 +108,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/settings/categories/exhibit_history"
+            element={
+              <ProtectedRoute>
+                <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" />
