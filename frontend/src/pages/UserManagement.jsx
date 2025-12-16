@@ -50,6 +50,7 @@ import { Plus, MoreVertical, Pencil, Trash2, Search, Filter, ArrowUp, ArrowDown,
 import { toast } from 'sonner';
 import { ColumnCustomizer, useColumnPreferences } from '@/components/ColumnCustomizer';
 import { COUNTRIES, getProvincesForCountry, getProvinceLabel, getPostalCodeLabel, getPostalCodePlaceholder } from '@/lib/addressData';
+import EmailLink from '@/components/EmailLink';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
