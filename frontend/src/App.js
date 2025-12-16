@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import '@/App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from '@/pages/Login';
@@ -14,6 +13,7 @@ import CategoriesPage from '@/pages/CategoriesPage';
 import EmailCompose from '@/pages/EmailCompose';
 import MainLayout from '@/components/MainLayout';
 import { Toaster } from '@/components/ui/sonner';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -26,15 +26,10 @@ function ProtectedRoute({ children }) {
 }
 
 function App() {
-  const [theme, setTheme] = useState('dark');
-
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
-
   return (
-    <div className="App">
-      <BrowserRouter>
+    <ThemeProvider>
+      <div className="App">
+        <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route
@@ -134,9 +129,10 @@ function App() {
             }
           />
         </Routes>
+        <Toaster position="top-right" />
       </BrowserRouter>
-      <Toaster position="top-right" />
     </div>
+    </ThemeProvider>
   );
 }
 
