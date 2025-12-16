@@ -167,11 +167,17 @@ export default function CategoriesPage() {
   const [sortOrder, setSortOrder] = useState('asc');
 
   // Determine category type from URL
-  const categoryType = window.location.pathname.includes('exhibit_history') ? 'exhibit_history' : 'business_category';
-  const pageTitle = categoryType === 'exhibit_history' ? 'Exhibit History' : 'Business Categories';
-  const pageDescription = categoryType === 'exhibit_history' 
-    ? 'Manage exhibit/event history options for companies'
-    : 'Manage business categories for company classification';
+  const getCategoryConfig = () => {
+    const path = window.location.pathname;
+    if (path.includes('exhibit_history')) {
+      return { type: 'exhibit_history', title: 'Exhibit History', description: 'Manage exhibit/event history options for companies', itemName: 'Event' };
+    } else if (path.includes('department')) {
+      return { type: 'department', title: 'Departments', description: 'Manage department options for staff members', itemName: 'Department' };
+    }
+    return { type: 'business_category', title: 'Business Categories', description: 'Manage business categories for company classification', itemName: 'Category' };
+  };
+  
+  const { type: categoryType, title: pageTitle, description: pageDescription, itemName } = getCategoryConfig();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
