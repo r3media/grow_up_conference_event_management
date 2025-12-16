@@ -810,7 +810,7 @@ export default function ContactManagement() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                          onClick={() => openEditDialog(contact)}
+                          onClick={() => navigate(`/contacts/${contact.id}`)}
                           data-testid={`edit-contact-${contact.id}`}
                         >
                           <Pencil className="w-4 h-4" />
