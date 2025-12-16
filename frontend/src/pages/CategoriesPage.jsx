@@ -323,22 +323,22 @@ export default function CategoriesPage() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-4xl font-bold mb-2">Business Categories</h1>
-            <p className="text-muted-foreground">Manage business categories for company classification</p>
+            <h1 className="text-4xl font-bold mb-2">{pageTitle}</h1>
+            <p className="text-muted-foreground">{pageDescription}</p>
           </div>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2" data-testid="add-category-button">
               <Plus className="w-4 h-4" />
-              Add Category
+              Add {categoryType === 'exhibit_history' ? 'Event' : 'Category'}
             </Button>
           </DialogTrigger>
           <DialogContent data-testid="category-dialog">
             <DialogHeader>
-              <DialogTitle>Add New Category</DialogTitle>
+              <DialogTitle>Add New {categoryType === 'exhibit_history' ? 'Exhibit Event' : 'Category'}</DialogTitle>
               <DialogDescription>
-                Create a new business category for companies.
+                Create a new {categoryType === 'exhibit_history' ? 'exhibit/event entry' : 'business category'}.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4">
