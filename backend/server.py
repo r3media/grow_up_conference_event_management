@@ -137,6 +137,7 @@ class ContactBase(BaseModel):
     tags: List[str] = []
     notes: Optional[str] = None
     photo_url: Optional[str] = None
+    address: Optional[AddressModel] = None  # Contact's personal address
 
 class ContactCreate(ContactBase):
     pass
@@ -150,6 +151,7 @@ class ContactUpdate(BaseModel):
     tags: Optional[List[str]] = None
     notes: Optional[str] = None
     photo_url: Optional[str] = None
+    address: Optional[AddressModel] = None
 
 class Contact(ContactBase):
     model_config = ConfigDict(extra="ignore")
