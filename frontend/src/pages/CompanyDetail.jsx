@@ -290,6 +290,13 @@ export default function CompanyDetail() {
               />
             </div>
 
+            {/* Exhibit History */}
+            <ExhibitHistoryEditor
+              value={company.exhibit_history || []}
+              options={exhibitHistoryOptions}
+              onSave={(values) => updateCompany({ exhibit_history: values })}
+            />
+
             {/* Address Block */}
             <div className="border-t pt-4">
               <InlineEditBlock
