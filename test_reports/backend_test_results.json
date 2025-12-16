@@ -1,158 +1,188 @@
 {
-  "total_tests": 25,
-  "passed_tests": 24,
-  "failed_tests": 1,
-  "success_rate": 96.0,
+  "total_tests": 30,
+  "passed_tests": 30,
+  "failed_tests": 0,
+  "success_rate": 100.0,
   "test_results": [
     {
       "test": "Login with demo credentials",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.108900"
+      "timestamp": "2025-12-16T00:06:49.865604"
     },
     {
       "test": "Get current user info",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.152481"
+      "timestamp": "2025-12-16T00:06:49.901130"
     },
     {
       "test": "Get dashboard statistics",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.192960"
+      "timestamp": "2025-12-16T00:06:49.943356"
     },
     {
       "test": "Get all contacts",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.236032"
+      "timestamp": "2025-12-16T00:06:49.986182"
+    },
+    {
+      "test": "Create company for contact test",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-16T00:06:50.026189"
     },
     {
       "test": "Create new contact",
-      "success": false,
-      "details": "Status: 422, Error: [{'type': 'missing', 'loc': ['body', 'company_id'], 'msg': 'Field required', 'input': {'name': 'John Doe', 'email': 'john.doe@example.com', 'phone': '+1-555-0123', 'company': 'Tech Corp', 'position': 'CEO', 'tags': ['speaker', 'vip'], 'notes': 'Keynote speaker for tech conference'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]",
-      "timestamp": "2025-12-16T00:06:32.272337"
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-16T00:06:50.064817"
+    },
+    {
+      "test": "Get specific contact",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-16T00:06:50.104307"
+    },
+    {
+      "test": "Update contact",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-16T00:06:50.143394"
+    },
+    {
+      "test": "Delete contact",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-16T00:06:50.223887"
+    },
+    {
+      "test": "Delete test company for contact",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-16T00:06:50.290135"
     },
     {
       "test": "Get all companies",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.310080"
+      "timestamp": "2025-12-16T00:06:50.327607"
     },
     {
       "test": "Create new company",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.349912"
+      "timestamp": "2025-12-16T00:06:50.363636"
     },
     {
       "test": "Update company",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.394948"
+      "timestamp": "2025-12-16T00:06:50.442466"
     },
     {
       "test": "Delete company",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.433232"
+      "timestamp": "2025-12-16T00:06:50.481977"
     },
     {
       "test": "Get all users",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.471718"
+      "timestamp": "2025-12-16T00:06:50.518509"
     },
     {
       "test": "Create new user",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.771781"
+      "timestamp": "2025-12-16T00:06:50.800636"
     },
     {
       "test": "Update user",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.814721"
+      "timestamp": "2025-12-16T00:06:50.840886"
     },
     {
       "test": "Delete user",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.852542"
+      "timestamp": "2025-12-16T00:06:50.877454"
     },
     {
       "test": "Get users for photo test",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:32.889952"
+      "timestamp": "2025-12-16T00:06:50.918120"
     },
     {
       "test": "User photo upload",
       "success": true,
-      "details": "Status: 200, Photo URL: /api/uploads/user_7f9ea511-8887-40a2-bb3b-3b7c7d4f6f29_ac02dc91.png",
-      "timestamp": "2025-12-16T00:06:32.971196"
+      "details": "Status: 200, Photo URL: /api/uploads/user_7f9ea511-8887-40a2-bb3b-3b7c7d4f6f29_6606a22f.png",
+      "timestamp": "2025-12-16T00:06:51.030031"
     },
     {
       "test": "User photo serving",
       "success": true,
-      "details": "Photo accessible at /api/uploads/user_7f9ea511-8887-40a2-bb3b-3b7c7d4f6f29_ac02dc91.png",
-      "timestamp": "2025-12-16T00:06:32.971204"
+      "details": "Photo accessible at /api/uploads/user_7f9ea511-8887-40a2-bb3b-3b7c7d4f6f29_6606a22f.png",
+      "timestamp": "2025-12-16T00:06:51.030040"
     },
     {
       "test": "User photo deletion",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:33.007268"
+      "timestamp": "2025-12-16T00:06:51.070728"
     },
     {
       "test": "Create company for contact photo test",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:33.050086"
+      "timestamp": "2025-12-16T00:06:51.107365"
     },
     {
       "test": "Create contact for photo test",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:33.131726"
+      "timestamp": "2025-12-16T00:06:51.147130"
     },
     {
       "test": "Contact photo upload",
       "success": true,
-      "details": "Status: 200, Photo URL: /api/uploads/contact_6b6ab310-d903-4cb0-9b18-9df3c4e57ab7_ce7c0548.png",
-      "timestamp": "2025-12-16T00:06:33.205721"
+      "details": "Status: 200, Photo URL: /api/uploads/contact_bb524bd5-58b5-4594-b484-ecbd6ed1cc31_2889af01.png",
+      "timestamp": "2025-12-16T00:06:51.222073"
     },
     {
       "test": "Contact photo serving",
       "success": true,
-      "details": "Photo accessible at /api/uploads/contact_6b6ab310-d903-4cb0-9b18-9df3c4e57ab7_ce7c0548.png",
-      "timestamp": "2025-12-16T00:06:33.205731"
+      "details": "Photo accessible at /api/uploads/contact_bb524bd5-58b5-4594-b484-ecbd6ed1cc31_2889af01.png",
+      "timestamp": "2025-12-16T00:06:51.222083"
     },
     {
       "test": "Contact photo deletion",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:33.245177"
+      "timestamp": "2025-12-16T00:06:51.257329"
     },
     {
       "test": "Delete test contact",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:33.283544"
+      "timestamp": "2025-12-16T00:06:51.300605"
     },
     {
       "test": "Delete test company",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:33.319341"
+      "timestamp": "2025-12-16T00:06:51.339077"
     },
     {
       "test": "Access user management (authorized role)",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-16T00:06:33.356810"
+      "timestamp": "2025-12-16T00:06:51.382860"
     }
   ]
 }
