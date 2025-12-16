@@ -103,6 +103,13 @@ export default function ContactManagement() {
     position: '',
     tags: '',
     notes: '',
+    address: {
+      street: '',
+      city: '',
+      province: 'Ontario',
+      postal_code: '',
+      country: 'Canada'
+    }
   });
   const [newCompanyData, setNewCompanyData] = useState({
     name: '',
