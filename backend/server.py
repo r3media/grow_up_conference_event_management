@@ -168,6 +168,7 @@ class CompanyBase(BaseModel):
     category: Optional[str] = None  # Business category from settings
     description: Optional[str] = None
     address: Optional[AddressModel] = None
+    exhibit_history: List[str] = []  # List of exhibit events from settings
 
 class CompanyCreate(CompanyBase):
     pass
@@ -178,6 +179,7 @@ class CompanyUpdate(BaseModel):
     category: Optional[str] = None
     description: Optional[str] = None
     address: Optional[AddressModel] = None
+    exhibit_history: Optional[List[str]] = None
 
 class Company(CompanyBase):
     model_config = ConfigDict(extra="ignore")
