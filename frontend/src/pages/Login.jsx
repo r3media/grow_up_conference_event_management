@@ -60,7 +60,12 @@ export default function Login() {
       </div>
 
       {/* Right side - Login form */}
-      <div className="flex items-center justify-center p-8 bg-background">
+      <div className="flex items-center justify-center p-8 bg-background relative">
+        {/* Theme switcher */}
+        <div className="absolute top-4 right-4">
+          <ThemeSwitcher />
+        </div>
+        
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
