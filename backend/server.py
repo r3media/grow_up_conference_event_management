@@ -800,6 +800,8 @@ async def create_company(company_data: CompanyCreate, current_user: dict = Depen
         description=company_dict["description"],
         address=AddressModel(**company_dict["address"]) if company_dict.get("address") else None,
         exhibit_history=company_dict.get("exhibit_history", []),
+        sales_rep_id=company_dict.get("sales_rep_id"),
+        sales_rep_name=sales_rep_name,
         contacts_count=company_dict["contacts_count"],
         created_at=datetime.fromisoformat(company_dict["created_at"]),
         updated_at=datetime.fromisoformat(company_dict["updated_at"]),
@@ -826,10 +828,20 @@ async def update_company(company_id: str, company_data: CompanyUpdate, current_u
         update_dict["address"] = company_data.address.model_dump()
     if company_data.exhibit_history is not None:
         update_dict["exhibit_history"] = company_data.exhibit_history
+    if company_data.sales_rep_id is not None:
+        update_dict["sales_rep_id"] = company_data.sales_rep_id
     
     await db.companies.update_one({"id": company_id}, {"$set": update_dict})
     
     updated_company = await db.companies.find_one({"id": company_id}, {"_id": 0})
+    
+    # Get sales rep name
+    sales_rep_name = None
+    if updated_company.get("sales_rep_id"):
+        sales_rep = await db.users.find_one({"id": updated_company["sales_rep_id"]}, {"_id": 0, "name": 1})
+        if sales_rep:
+            sales_rep_name = sales_rep["name"]
+    
     return Company(
         id=updated_company["id"],
         name=updated_company["name"],
@@ -838,6 +850,8 @@ async def update_company(company_id: str, company_data: CompanyUpdate, current_u
         description=updated_company.get("description"),
         address=AddressModel(**updated_company["address"]) if updated_company.get("address") else None,
         exhibit_history=updated_company.get("exhibit_history", []),
+        sales_rep_id=updated_company.get("sales_rep_id"),
+        sales_rep_name=sales_rep_name,
         contacts_count=updated_company.get("contacts_count", 0),
         created_at=datetime.fromisoformat(updated_company["created_at"]),
         updated_at=datetime.fromisoformat(updated_company["updated_at"]),
