@@ -216,6 +216,7 @@ export default function CompanyManagement() {
       website: company.website || '',
       category: company.category || '',
       description: company.description || '',
+      exhibit_history: company.exhibit_history || [],
       address: company.address || {
         street: '',
         city: '',
