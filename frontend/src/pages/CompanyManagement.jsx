@@ -265,6 +265,19 @@ export default function CompanyManagement() {
             {company.website.replace(/^https?:\/\//, '')}
           </a>
         ) : '-';
+      case 'exhibit_history':
+        return company.exhibit_history?.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {company.exhibit_history.slice(0, 2).map((event, i) => (
+              <span key={i} className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">
+                {event}
+              </span>
+            ))}
+            {company.exhibit_history.length > 2 && (
+              <span className="text-xs text-muted-foreground">+{company.exhibit_history.length - 2}</span>
+            )}
+          </div>
+        ) : '-';
       case 'category':
         return company.category ? (
           <span className="px-2 py-1 rounded-full text-xs bg-secondary/10 text-secondary font-medium">
