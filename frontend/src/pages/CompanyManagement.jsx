@@ -79,11 +79,14 @@ export default function CompanyManagement() {
   const navigate = useNavigate();
   const [companies, setCompanies] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [exhibitHistoryOptions, setExhibitHistoryOptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [exhibitHistoryFilter, setExhibitHistoryFilter] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
   const [formData, setFormData] = useState({
@@ -91,6 +94,7 @@ export default function CompanyManagement() {
     website: '',
     category: '',
     description: '',
+    exhibit_history: [],
     address: {
       street: '',
       city: '',
@@ -108,7 +112,8 @@ export default function CompanyManagement() {
   useEffect(() => {
     fetchCompanies();
     fetchCategories();
-  }, [searchTerm, sortBy, sortOrder]);
+    fetchExhibitHistoryOptions();
+  }, [searchTerm, categoryFilter, exhibitHistoryFilter, sortBy, sortOrder]);
 
   const fetchCategories = async () => {
     try {
@@ -119,10 +124,21 @@ export default function CompanyManagement() {
     }
   };
 
+  const fetchExhibitHistoryOptions = async () => {
+    try {
+      const response = await axios.get(`${API}/settings/categories?category_type=exhibit_history`, getAuthHeaders());
+      setExhibitHistoryOptions(response.data);
+    } catch (error) {
+      console.error('Failed to load exhibit history options');
+    }
+  };
+
   const fetchCompanies = async () => {
     try {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
+      if (categoryFilter) params.append('category', categoryFilter);
+      if (exhibitHistoryFilter) params.append('exhibit_history', exhibitHistoryFilter);
       params.append('sort_by', sortBy);
       params.append('sort_order', sortOrder);
       
