@@ -3,7 +3,9 @@
 import requests
 import sys
 import json
+import io
 from datetime import datetime
+from PIL import Image
 
 class ConferenceAPITester:
     def __init__(self, base_url="https://confhub-3.preview.emergentagent.com"):
