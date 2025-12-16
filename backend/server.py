@@ -313,6 +313,8 @@ async def get_users(
     search: Optional[str] = None,
     role: Optional[str] = None,
     department: Optional[str] = None,
+    sort_by: str = "name",
+    sort_order: str = "asc",
     current_user: dict = Depends(require_role(["Super Admin", "Event Manager"]))
 ):
     query = {}
@@ -324,13 +326,17 @@ async def get_users(
             {"job_title": {"$regex": search, "$options": "i"}}
         ]
     
-    if role:
+    if role and role != "all":
         query["role"] = role
     
     if department:
         query["department"] = department
     
-    users = await db.users.find(query, {"_id": 0, "hashed_password": 0}).to_list(1000)
+    # Build sort criteria
+    sort_field = sort_by if sort_by in ["name", "email", "role", "department", "job_title", "is_active"] else "name"
+    sort_direction = 1 if sort_order == "asc" else -1
+    
+    users = await db.users.find(query, {"_id": 0, "hashed_password": 0}).sort(sort_field, sort_direction).to_list(1000)
     return [
         User(
             id=user["id"],
