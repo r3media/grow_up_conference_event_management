@@ -53,10 +53,26 @@ function App() {
             }
           />
           <Route
+            path="/users/:id"
+            element={
+              <ProtectedRoute>
+                <UserDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/contacts"
             element={
               <ProtectedRoute>
                 <ContactManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/contacts/:id"
+            element={
+              <ProtectedRoute>
+                <ContactDetail />
               </ProtectedRoute>
             }
           />
