@@ -273,6 +273,13 @@ export default function ContactManagement() {
       position: '',
       tags: '',
       notes: '',
+      address: {
+        street: '',
+        city: '',
+        province: 'Ontario',
+        postal_code: '',
+        country: 'Canada'
+      }
     });
     setSelectedContact(null);
     setPhotoFile(null);
@@ -298,6 +305,13 @@ export default function ContactManagement() {
       position: contact.position || '',
       tags: contact.tags?.join(', ') || '',
       notes: contact.notes || '',
+      address: contact.address || {
+        street: '',
+        city: '',
+        province: 'Ontario',
+        postal_code: '',
+        country: 'Canada'
+      }
     });
     setPhotoFile(null);
     setPhotoPreview(contact.photo_url ? `${BACKEND_URL}${contact.photo_url}` : null);
