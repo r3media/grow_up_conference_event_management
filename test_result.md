@@ -244,4 +244,4 @@ test_plan:
 
 agent_communication:
   - agent: "main"
-    message: "Implemented photo upload functionality for Users and Contacts. Backend endpoints created, frontend UI added with file input, preview, and upload on form submit. Photos are displayed in list views using Avatar component. Please test the complete flow: 1) Create/Edit user with photo upload 2) Verify photo displays in list 3) Test same flow for contacts. Use credentials: admin@demo.com / admin123"
+    message: "Major UI/UX update completed: 1) Click-to-navigate: Company/User/Contact names now navigate to detail pages instead of edit modals. 2) New detail pages for Users and Contacts with inline editing. 3) Column customization per-user (saved to localStorage) for Companies, Users, Contacts. 4) Companies table now shows actual URLs, Category, City, Province columns. 5) Inline editing on all detail pages with grouped fields (e.g., Address block). 6) InlineEdit and InlineEditBlock reusable components created. Test: Navigate between pages, customize columns, verify inline editing. Credentials: admin@demo.com / admin123"
