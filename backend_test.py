@@ -183,12 +183,33 @@ class ConferenceAPITester:
             200
         )
         
+        # First create a company for the contact
+        test_company_data = {
+            "name": "Tech Corp",
+            "website": "https://techcorp.com",
+            "category": "Technology"
+        }
+        
+        company_response = self.run_test(
+            "Create company for contact test",
+            "POST",
+            "companies",
+            200,
+            data=test_company_data
+        )
+        
+        if not company_response or 'id' not in company_response:
+            print("   ⚠️  Cannot create company for contact test")
+            return
+        
+        company_id = company_response['id']
+        
         # Test create contact
         test_contact_data = {
             "name": "John Doe",
             "email": "john.doe@example.com",
             "phone": "+1-555-0123",
-            "company": "Tech Corp",
+            "company_id": company_id,
             "position": "CEO",
             "tags": ["speaker", "vip"],
             "notes": "Keynote speaker for tech conference"
