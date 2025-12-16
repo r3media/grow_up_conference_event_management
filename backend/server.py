@@ -169,6 +169,7 @@ class CompanyBase(BaseModel):
     description: Optional[str] = None
     address: Optional[AddressModel] = None
     exhibit_history: List[str] = []  # List of exhibit events from settings
+    sales_rep_id: Optional[str] = None  # User ID of sales rep
 
 class CompanyCreate(CompanyBase):
     pass
@@ -180,10 +181,12 @@ class CompanyUpdate(BaseModel):
     description: Optional[str] = None
     address: Optional[AddressModel] = None
     exhibit_history: Optional[List[str]] = None
+    sales_rep_id: Optional[str] = None
 
 class Company(CompanyBase):
     model_config = ConfigDict(extra="ignore")
     id: str
+    sales_rep_name: Optional[str] = None  # Populated from user lookup
     contacts_count: int = 0
     created_at: datetime
     updated_at: datetime
