@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { InlineEdit } from '@/components/InlineEdit';
-import { ArrowLeft, Mail, Phone, Building2, Tag, Briefcase, Camera, X } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Building2, Tag, Briefcase, Camera, X, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -200,6 +201,23 @@ export default function ContactDetail() {
                     type="email"
                     placeholder="Enter email"
                   />
+                  {contact.email && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => navigate(`/email/compose?to=${encodeURIComponent(contact.email)}`)}
+                          >
+                            <Send className="w-3.5 h-3.5 text-primary" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Send email</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
               </div>
             </div>
