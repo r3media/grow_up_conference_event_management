@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,8 +45,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, MoreVertical, Pencil, Trash2, Globe, Building2, Search, Eye, Mail, Phone, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Trash2, Building2, Search, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
+import { ColumnCustomizer, useColumnPreferences } from '@/components/ColumnCustomizer';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -56,14 +58,29 @@ const getAuthHeaders = () => ({
 
 const provinces = ['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'];
 
+// Define all available columns
+const ALL_COLUMNS = [
+  { key: 'name', label: 'Company Name', sortable: true },
+  { key: 'website', label: 'Website', sortable: true },
+  { key: 'category', label: 'Category', sortable: true },
+  { key: 'city', label: 'City', sortable: true },
+  { key: 'province', label: 'Province', sortable: true },
+  { key: 'country', label: 'Country', sortable: true },
+  { key: 'street', label: 'Street', sortable: false },
+  { key: 'postal_code', label: 'Postal Code', sortable: false },
+  { key: 'description', label: 'Description', sortable: false },
+  { key: 'contacts_count', label: 'Contacts', sortable: true },
+];
+
+const DEFAULT_COLUMNS = ['name', 'website', 'category', 'city', 'province'];
+
 export default function CompanyManagement() {
+  const navigate = useNavigate();
   const [companies, setCompanies] = useState([]);
-  const [contacts, setContacts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
@@ -81,6 +98,11 @@ export default function CompanyManagement() {
       country: 'Canada'
     }
   });
+
+  const { visibleColumns, toggleColumn, resetColumns } = useColumnPreferences(
+    'company_columns',
+    DEFAULT_COLUMNS
+  );
 
   useEffect(() => {
     fetchCompanies();
@@ -112,27 +134,11 @@ export default function CompanyManagement() {
     }
   };
 
-  const fetchCompanyContacts = async (companyId) => {
-    try {
-      const response = await axios.get(`${API}/companies/${companyId}/contacts`, getAuthHeaders());
-      setContacts(response.data);
-    } catch (error) {
-      toast.error('Failed to load company contacts');
-    }
-  };
-
-  const openViewDialog = async (company) => {
-    setSelectedCompany(company);
-    await fetchCompanyContacts(company.id);
-    setViewDialogOpen(true);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     const submitData = { ...formData };
     
-    // Clean up empty address
     if (!submitData.address.street && !submitData.address.city && !submitData.address.postal_code) {
       submitData.address = null;
     }
@@ -164,7 +170,7 @@ export default function CompanyManagement() {
       setSelectedCompany(null);
       fetchCompanies();
     } catch (error) {
-      toast.error('Failed to delete company');
+      toast.error(error.response?.data?.detail || 'Failed to delete company');
     }
   };
 
@@ -206,6 +212,80 @@ export default function CompanyManagement() {
   const openDeleteDialog = (company) => {
     setSelectedCompany(company);
     setDeleteDialogOpen(true);
+  };
+
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
+
+  const getCellValue = (company, key) => {
+    switch (key) {
+      case 'city':
+        return company.address?.city || '-';
+      case 'province':
+        return company.address?.province || '-';
+      case 'country':
+        return company.address?.country || '-';
+      case 'street':
+        return company.address?.street || '-';
+      case 'postal_code':
+        return company.address?.postal_code || '-';
+      case 'website':
+        return company.website ? (
+          <a
+            href={company.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline text-sm truncate max-w-[200px] block"
+          >
+            {company.website.replace(/^https?:\/\//, '')}
+          </a>
+        ) : '-';
+      case 'category':
+        return company.category ? (
+          <span className="px-2 py-1 rounded-full text-xs bg-secondary/10 text-secondary font-medium">
+            {company.category}
+          </span>
+        ) : '-';
+      case 'contacts_count':
+        return company.contacts_count || 0;
+      case 'description':
+        return company.description ? (
+          <span className="truncate max-w-[200px] block text-sm text-muted-foreground">
+            {company.description}
+          </span>
+        ) : '-';
+      default:
+        return company[key] || '-';
+    }
+  };
+
+  const SortableHeader = ({ column, children }) => {
+    const colDef = ALL_COLUMNS.find(c => c.key === column);
+    if (!colDef?.sortable) {
+      return <TableHead>{children}</TableHead>;
+    }
+
+    return (
+      <TableHead>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 font-semibold -ml-3"
+          onClick={() => handleSort(column)}
+        >
+          {children}
+          {sortBy === column && (
+            sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+          )}
+        </Button>
+      </TableHead>
+    );
   };
 
   return (
@@ -345,11 +425,11 @@ export default function CompanyManagement() {
         </Dialog>
       </div>
 
-      {/* Search and Sort */}
+      {/* Search and Column Customizer */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative md:col-span-2">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search by company name or category..."
@@ -359,27 +439,12 @@ export default function CompanyManagement() {
                 data-testid="company-search-input"
               />
             </div>
-            <div className="flex gap-2">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger data-testid="company-sort-by">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Company Name</SelectItem>
-                  <SelectItem value="category">Category</SelectItem>
-                  <SelectItem value="address.city">City</SelectItem>
-                  <SelectItem value="address.province">Province</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                data-testid="company-sort-order"
-              >
-                {sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
-              </Button>
-            </div>
+            <ColumnCustomizer
+              allColumns={ALL_COLUMNS}
+              visibleColumns={visibleColumns}
+              onToggle={toggleColumn}
+              onReset={resetColumns}
+            />
           </div>
         </CardContent>
       </Card>
@@ -397,87 +462,39 @@ export default function CompanyManagement() {
             <Table data-testid="companies-table">
               <TableHeader>
                 <TableRow>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 font-semibold -ml-3"
-                      onClick={() => {
-                        setSortBy('name');
-                        setSortOrder(sortBy === 'name' && sortOrder === 'asc' ? 'desc' : 'asc');
-                      }}
-                    >
-                      Company
-                      {sortBy === 'name' && (
-                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableHead>
-                  <TableHead>Website</TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 font-semibold -ml-3"
-                      onClick={() => {
-                        setSortBy('category');
-                        setSortOrder(sortBy === 'category' && sortOrder === 'asc' ? 'desc' : 'asc');
-                      }}
-                    >
-                      Category
-                      {sortBy === 'category' && (
-                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableHead>
-                  <TableHead>Description</TableHead>
+                  {visibleColumns.includes('name') && (
+                    <SortableHeader column="name">Company</SortableHeader>
+                  )}
+                  {visibleColumns.filter(c => c !== 'name').map((col) => (
+                    <SortableHeader key={col} column={col}>
+                      {ALL_COLUMNS.find(c => c.key === col)?.label || col}
+                    </SortableHeader>
+                  ))}
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {companies.map((company) => (
                   <TableRow key={company.id} data-testid={`company-row-${company.id}`}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
-                          <Building2 className="w-5 h-5 text-primary" />
+                    {visibleColumns.includes('name') && (
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
+                            <Building2 className="w-5 h-5 text-primary" />
+                          </div>
+                          <button
+                            onClick={() => navigate(`/companies/${company.id}`)}
+                            className="font-medium text-primary hover:underline text-left"
+                            data-testid={`company-name-link-${company.id}`}
+                          >
+                            {company.name}
+                          </button>
                         </div>
-                        <button
-                          onClick={() => openEditDialog(company)}
-                          className="font-medium text-primary hover:underline text-left"
-                          data-testid={`company-name-link-${company.id}`}
-                        >
-                          {company.name}
-                        </button>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {company.website ? (
-                        <a
-                          href={company.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm text-primary hover:underline"
-                        >
-                          <Globe className="w-4 h-4" />
-                          Visit Site
-                        </a>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {company.category ? (
-                        <span className="px-2 py-1 rounded-full text-xs bg-secondary/10 text-secondary font-medium">
-                          {company.category}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
-                      {company.description || '-'}
-                    </TableCell>
+                      </TableCell>
+                    )}
+                    {visibleColumns.filter(c => c !== 'name').map((col) => (
+                      <TableCell key={col}>{getCellValue(company, col)}</TableCell>
+                    ))}
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -486,10 +503,6 @@ export default function CompanyManagement() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => window.location.href = `/companies/${company.id}`} data-testid={`view-company-${company.id}`}>
-                            <Eye className="w-4 h-4 mr-2" />
-                            View Details
-                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openEditDialog(company)} data-testid={`edit-company-${company.id}`}>
                             <Pencil className="w-4 h-4" />
                           </DropdownMenuItem>
@@ -528,80 +541,6 @@ export default function CompanyManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* View Company Contacts Dialog */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-4xl" data-testid="view-company-dialog">
-          <DialogHeader>
-            <DialogTitle>{selectedCompany?.name} - Contacts</DialogTitle>
-            <DialogDescription>
-              All contacts associated with this company ({contacts.length})
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            {contacts.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No contacts found for this company
-              </div>
-            ) : (
-              <Table data-testid="company-contacts-table">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Tags</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {contacts.map((contact) => (
-                    <TableRow key={contact.id}>
-                      <TableCell className="font-medium">{contact.name}</TableCell>
-                      <TableCell>
-                        {contact.email ? (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="w-4 h-4 text-muted-foreground" />
-                            {contact.email}
-                          </div>
-                        ) : '-'}
-                      </TableCell>
-                      <TableCell>
-                        {contact.phone ? (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="w-4 h-4 text-muted-foreground" />
-                            {contact.phone}
-                          </div>
-                        ) : '-'}
-                      </TableCell>
-                      <TableCell className="text-sm">{contact.position || '-'}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {contact.tags?.length > 0 ? (
-                            contact.tags.map((tag, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary"
-                              >
-                                {tag}
-                              </span>
-                            ))
-                          ) : '-'}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
