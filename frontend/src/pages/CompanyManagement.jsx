@@ -393,9 +393,31 @@ export default function CompanyManagement() {
                   data-testid="company-description-input"
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label>Exhibit History</Label>
+                <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
+                  {exhibitHistoryOptions.map((opt) => (
+                    <div key={opt.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`exhibit-${opt.id}`}
+                        checked={formData.exhibit_history.includes(opt.category_name)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFormData({ ...formData, exhibit_history: [...formData.exhibit_history, opt.category_name] });
+                          } else {
+                            setFormData({ ...formData, exhibit_history: formData.exhibit_history.filter(e => e !== opt.category_name) });
+                          }
+                        }}
+                      />
+                      <label htmlFor={`exhibit-${opt.id}`} className="text-sm">{opt.category_name}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
               
               <div className="border-t pt-4">
-                <Label className="text-base font-semibold mb-3 block">Address (Canada)</Label>
+                <Label className="text-base font-semibold mb-3 block">Address</Label>
                 <div className="space-y-3">
                   <div className="space-y-2">
                     <Label htmlFor="street">Street Address</Label>
