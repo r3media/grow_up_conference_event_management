@@ -38,6 +38,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Globe, Building2, MapPin, Mail, Phone, Pencil, Plus, MoreVertical, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
