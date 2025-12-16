@@ -358,6 +358,8 @@ export default function ContactManagement() {
             {contact.phone}
           </div>
         ) : '-';
+      case 'city':
+        return contact.address?.city || '-';
       case 'tags':
         return contact.tags?.length > 0 ? (
           <div className="flex flex-wrap gap-1">
