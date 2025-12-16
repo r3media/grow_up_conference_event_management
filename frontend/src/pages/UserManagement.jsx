@@ -46,7 +46,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, MoreVertical, Pencil, Trash2, Search, Filter, ArrowUp, ArrowDown, Camera, X } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Trash2, Search, Filter, ArrowUp, ArrowDown, Camera, X, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { ColumnCustomizer, useColumnPreferences } from '@/components/ColumnCustomizer';
 import { COUNTRIES, getProvincesForCountry, getProvinceLabel, getPostalCodeLabel, getPostalCodePlaceholder } from '@/lib/addressData';
@@ -94,6 +94,7 @@ export default function UserManagement() {
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -482,15 +483,26 @@ export default function UserManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="password">{selectedUser ? 'New Password' : 'Password *'}</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    required={!selectedUser}
-                    placeholder={selectedUser ? 'Leave blank to keep current' : ''}
-                    data-testid="user-password-input"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      required={!selectedUser}
+                      placeholder={selectedUser ? 'Leave blank to keep current' : ''}
+                      className="pr-10"
+                      data-testid="user-password-input"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      data-testid="password-visibility-toggle"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="role">Role *</Label>
@@ -745,7 +757,7 @@ export default function UserManagement() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                          onClick={() => openEditDialog(user)}
+                          onClick={() => navigate(`/users/${user.id}`)}
                           data-testid={`edit-user-${user.id}`}
                         >
                           <Pencil className="w-4 h-4" />
