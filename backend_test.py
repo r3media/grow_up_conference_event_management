@@ -341,6 +341,9 @@ class ConferenceAPITester:
         self.test_contact_management()
         self.test_settings_categories()
         self.test_address_functionality()
+        self.test_email_templates()
+        self.test_email_signatures()
+        self.test_email_functionality()
         
         # Print summary
         print(f"\n📊 Test Summary:")
