@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,15 +14,18 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronsUpDown } from 'lucide-react';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import {
   Table,
   TableBody,
@@ -48,8 +52,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Plus, MoreVertical, Pencil, Trash2, Mail, Phone, Building2, Search, ArrowUp, ArrowDown, Camera, X } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Trash2, Mail, Phone, Building2, Search, ArrowUp, ArrowDown, Camera, X, Check, ChevronsUpDown } from 'lucide-react';
 import { toast } from 'sonner';
+import { ColumnCustomizer, useColumnPreferences } from '@/components/ColumnCustomizer';
+import { cn } from '@/lib/utils';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -58,7 +64,21 @@ const getAuthHeaders = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
 });
 
+// Define all available columns
+const ALL_COLUMNS = [
+  { key: 'name', label: 'Name', sortable: true },
+  { key: 'email', label: 'Email', sortable: true },
+  { key: 'phone', label: 'Phone', sortable: false },
+  { key: 'company', label: 'Company', sortable: true },
+  { key: 'position', label: 'Position', sortable: true },
+  { key: 'tags', label: 'Tags', sortable: false },
+  { key: 'notes', label: 'Notes', sortable: false },
+];
+
+const DEFAULT_COLUMNS = ['name', 'email', 'phone', 'company', 'position'];
+
 export default function ContactManagement() {
+  const navigate = useNavigate();
   const [contacts, setContacts] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,6 +108,11 @@ export default function ContactManagement() {
     industry: '',
     description: '',
   });
+
+  const { visibleColumns, toggleColumn, resetColumns } = useColumnPreferences(
+    'contact_columns',
+    DEFAULT_COLUMNS
+  );
 
   useEffect(() => {
     fetchContacts();
@@ -144,7 +169,6 @@ export default function ContactManagement() {
         toast.success('Contact created successfully');
       }
       
-      // Upload photo if selected
       if (photoFile && contactId) {
         await uploadPhoto(contactId);
       }
@@ -208,10 +232,9 @@ export default function ContactManagement() {
       const response = await axios.post(`${API}/companies`, newCompanyData, getAuthHeaders());
       toast.success('Company created successfully');
       setCompanyDialogOpen(false);
-      // Auto-select the newly created company
-      setFormData({ ...formData, company_id: response.data.id });
-      await fetchCompanies();
       resetNewCompanyForm();
+      await fetchCompanies();
+      setFormData({ ...formData, company_id: response.data.id });
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to create company');
     }
@@ -277,12 +300,96 @@ export default function ContactManagement() {
     setDeleteDialogOpen(true);
   };
 
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
+
+  const getCellValue = (contact, key) => {
+    switch (key) {
+      case 'company':
+        return contact.company_name ? (
+          <button
+            onClick={() => navigate(`/companies/${contact.company_id}`)}
+            className="flex items-center gap-2 text-primary hover:underline"
+          >
+            <Building2 className="w-4 h-4" />
+            {contact.company_name}
+          </button>
+        ) : '-';
+      case 'email':
+        return contact.email ? (
+          <div className="flex items-center gap-2 text-sm">
+            <Mail className="w-4 h-4 text-muted-foreground" />
+            {contact.email}
+          </div>
+        ) : '-';
+      case 'phone':
+        return contact.phone ? (
+          <div className="flex items-center gap-2 text-sm">
+            <Phone className="w-4 h-4 text-muted-foreground" />
+            {contact.phone}
+          </div>
+        ) : '-';
+      case 'tags':
+        return contact.tags?.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {contact.tags.slice(0, 2).map((tag, i) => (
+              <span key={i} className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">
+                {tag}
+              </span>
+            ))}
+            {contact.tags.length > 2 && (
+              <span className="text-xs text-muted-foreground">+{contact.tags.length - 2}</span>
+            )}
+          </div>
+        ) : '-';
+      case 'notes':
+        return contact.notes ? (
+          <span className="truncate max-w-[200px] block text-sm text-muted-foreground">
+            {contact.notes}
+          </span>
+        ) : '-';
+      default:
+        return contact[key] || '-';
+    }
+  };
+
+  const SortableHeader = ({ column, children }) => {
+    const colDef = ALL_COLUMNS.find(c => c.key === column);
+    if (!colDef?.sortable) {
+      return <TableHead>{children}</TableHead>;
+    }
+
+    return (
+      <TableHead>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 font-semibold -ml-3"
+          onClick={() => handleSort(column)}
+        >
+          {children}
+          {sortBy === column && (
+            sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+          )}
+        </Button>
+      </TableHead>
+    );
+  };
+
+  const selectedCompany = companies.find(c => c.id === formData.company_id);
+
   return (
     <div className="space-y-6" data-testid="contact-management">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold mb-2">Contacts</h1>
-          <p className="text-muted-foreground">Manage your conference contacts and attendees</p>
+          <p className="text-muted-foreground">Manage attendees, speakers, and partners</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
@@ -294,11 +401,11 @@ export default function ContactManagement() {
               Add Contact
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="contact-dialog">
+          <DialogContent className="max-w-2xl" data-testid="contact-dialog">
             <DialogHeader>
               <DialogTitle>{selectedContact ? 'Edit Contact' : 'Add New Contact'}</DialogTitle>
               <DialogDescription>
-                {selectedContact ? 'Update contact details and information.' : 'Add a new contact to your conference database.'}
+                {selectedContact ? 'Update contact information and details.' : 'Add a new contact to your database.'}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -387,63 +494,99 @@ export default function ContactManagement() {
                   />
                 </div>
               </div>
-              
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Company *</Label>
-                  <Button 
-                    type="button" 
-                    variant="link" 
-                    size="sm"
-                    onClick={() => setCompanyDialogOpen(true)}
-                    className="text-primary h-auto p-0"
-                  >
-                    + Create New Company
-                  </Button>
+                <Label>Company *</Label>
+                <div className="flex gap-2">
+                  <Popover open={companySearchOpen} onOpenChange={setCompanySearchOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={companySearchOpen}
+                        className="flex-1 justify-between"
+                        data-testid="contact-company-combobox"
+                      >
+                        {selectedCompany ? selectedCompany.name : "Select a company..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Search companies..." data-testid="contact-company-search" />
+                        <CommandList>
+                          <CommandEmpty>No company found.</CommandEmpty>
+                          <CommandGroup>
+                            {companies.map((company) => (
+                              <CommandItem
+                                key={company.id}
+                                value={company.name}
+                                onSelect={() => {
+                                  setFormData({ ...formData, company_id: company.id });
+                                  setCompanySearchOpen(false);
+                                }}
+                                data-testid={`contact-company-option-${company.id}`}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formData.company_id === company.id ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {company.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <Dialog open={companyDialogOpen} onOpenChange={setCompanyDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button type="button" variant="outline" data-testid="create-company-button">
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent data-testid="quick-company-dialog">
+                      <DialogHeader>
+                        <DialogTitle>Quick Add Company</DialogTitle>
+                        <DialogDescription>
+                          Create a new company to associate with this contact.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handleCreateCompany} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="company_name">Company Name *</Label>
+                          <Input
+                            id="company_name"
+                            value={newCompanyData.name}
+                            onChange={(e) => setNewCompanyData({ ...newCompanyData, name: e.target.value })}
+                            required
+                            data-testid="quick-company-name-input"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="company_website">Website</Label>
+                          <Input
+                            id="company_website"
+                            type="url"
+                            value={newCompanyData.website}
+                            onChange={(e) => setNewCompanyData({ ...newCompanyData, website: e.target.value })}
+                            placeholder="https://example.com"
+                            data-testid="quick-company-website-input"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button type="button" variant="outline" onClick={() => setCompanyDialogOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button type="submit" data-testid="quick-company-submit-button">
+                            Create
+                          </Button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
-                <Popover open={companySearchOpen} onOpenChange={setCompanySearchOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={companySearchOpen}
-                      className="w-full justify-between"
-                      data-testid="contact-company-select"
-                    >
-                      {formData.company_id
-                        ? companies.find((c) => c.id === formData.company_id)?.name
-                        : "Select company..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0" align="start">
-                    <Command>
-                      <CommandInput placeholder="Search company..." />
-                      <CommandEmpty>No company found.</CommandEmpty>
-                      <CommandGroup className="max-h-64 overflow-auto">
-                        {companies
-                          .sort((a, b) => a.name.localeCompare(b.name))
-                          .map((company) => (
-                          <CommandItem
-                            key={company.id}
-                            value={company.name}
-                            onSelect={() => {
-                              setFormData({ ...formData, company_id: company.id });
-                              setCompanySearchOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={`mr-2 h-4 w-4 ${
-                                formData.company_id === company.id ? "opacity-100" : "opacity-0"
-                              }`}
-                            />
-                            {company.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
@@ -478,93 +621,25 @@ export default function ContactManagement() {
         </Dialog>
       </div>
 
-      {/* Quick Company Creation Dialog */}
-      <Dialog open={companyDialogOpen} onOpenChange={setCompanyDialogOpen}>
-        <DialogContent data-testid="quick-company-dialog">
-          <DialogHeader>
-            <DialogTitle>Create New Company</DialogTitle>
-            <DialogDescription>
-              Quickly add a new company to your database
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreateCompany} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="company-name">Company Name *</Label>
-              <Input
-                id="company-name"
-                value={newCompanyData.name}
-                onChange={(e) => setNewCompanyData({ ...newCompanyData, name: e.target.value })}
-                required
-                data-testid="quick-company-name-input"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="company-website">Website</Label>
-                <Input
-                  id="company-website"
-                  type="url"
-                  value={newCompanyData.website}
-                  onChange={(e) => setNewCompanyData({ ...newCompanyData, website: e.target.value })}
-                  placeholder="https://example.com"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="company-industry">Industry</Label>
-                <Input
-                  id="company-industry"
-                  value={newCompanyData.industry}
-                  onChange={(e) => setNewCompanyData({ ...newCompanyData, industry: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => {
-                setCompanyDialogOpen(false);
-                resetNewCompanyForm();
-              }}>
-                Cancel
-              </Button>
-              <Button type="submit">Create Company</Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Search and Sort */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative md:col-span-2">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search by name, email, or position..."
+                placeholder="Search by name, email, company, or position..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
                 data-testid="contact-search-input"
               />
             </div>
-            <div className="flex gap-2">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger data-testid="contact-sort-by">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="position">Position</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                data-testid="contact-sort-order"
-              >
-                {sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
-              </Button>
-            </div>
+            <ColumnCustomizer
+              allColumns={ALL_COLUMNS}
+              visibleColumns={visibleColumns}
+              onToggle={toggleColumn}
+              onReset={resetColumns}
+            />
           </div>
         </CardContent>
       </Card>
@@ -582,129 +657,44 @@ export default function ContactManagement() {
             <Table data-testid="contacts-table">
               <TableHeader>
                 <TableRow>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 font-semibold -ml-3"
-                      onClick={() => {
-                        setSortBy('name');
-                        setSortOrder(sortBy === 'name' && sortOrder === 'asc' ? 'desc' : 'asc');
-                      }}
-                    >
-                      Name
-                      {sortBy === 'name' && (
-                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 font-semibold -ml-3"
-                      onClick={() => {
-                        setSortBy('email');
-                        setSortOrder(sortBy === 'email' && sortOrder === 'asc' ? 'desc' : 'asc');
-                      }}
-                    >
-                      Email
-                      {sortBy === 'email' && (
-                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 font-semibold -ml-3"
-                      onClick={() => {
-                        setSortBy('position');
-                        setSortOrder(sortBy === 'position' && sortOrder === 'asc' ? 'desc' : 'asc');
-                      }}
-                    >
-                      Position
-                      {sortBy === 'position' && (
-                        sortOrder === 'asc' ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableHead>
-                  <TableHead>Tags</TableHead>
+                  {visibleColumns.includes('name') && (
+                    <SortableHeader column="name">Name</SortableHeader>
+                  )}
+                  {visibleColumns.filter(c => c !== 'name').map((col) => (
+                    <SortableHeader key={col} column={col}>
+                      {ALL_COLUMNS.find(c => c.key === col)?.label || col}
+                    </SortableHeader>
+                  ))}
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {contacts.map((contact) => (
                   <TableRow key={contact.id} data-testid={`contact-row-${contact.id}`}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="w-8 h-8">
-                          {contact.photo_url ? (
-                            <AvatarImage src={`${BACKEND_URL}${contact.photo_url}`} alt={contact.name} />
-                          ) : null}
-                          <AvatarFallback className="bg-secondary text-secondary-foreground text-sm">
-                            {contact.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <button
-                          onClick={() => openEditDialog(contact)}
-                          className="font-medium text-primary hover:underline text-left"
-                          data-testid={`contact-name-link-${contact.id}`}
-                        >
-                          {contact.name}
-                        </button>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {contact.email ? (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Mail className="w-4 h-4 text-muted-foreground" />
-                          {contact.email}
+                    {visibleColumns.includes('name') && (
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-8 h-8">
+                            {contact.photo_url ? (
+                              <AvatarImage src={`${BACKEND_URL}${contact.photo_url}`} alt={contact.name} />
+                            ) : null}
+                            <AvatarFallback className="bg-secondary text-secondary-foreground text-sm">
+                              {contact.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <button
+                            onClick={() => navigate(`/contacts/${contact.id}`)}
+                            className="font-medium text-primary hover:underline text-left"
+                            data-testid={`contact-name-link-${contact.id}`}
+                          >
+                            {contact.name}
+                          </button>
                         </div>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {contact.phone ? (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          {contact.phone}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {contact.company_name ? (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Building2 className="w-4 h-4 text-muted-foreground" />
-                          {contact.company_name}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm">{contact.position || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {contact.tags?.length > 0 ? (
-                          contact.tags.map((tag, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary"
-                            >
-                              {tag}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </div>
-                    </TableCell>
+                      </TableCell>
+                    )}
+                    {visibleColumns.filter(c => c !== 'name').map((col) => (
+                      <TableCell key={col}>{getCellValue(contact, col)}</TableCell>
+                    ))}
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
