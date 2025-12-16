@@ -309,6 +309,187 @@ class ConferenceAPITester:
                 else:
                     self.log_test(f"Stats field '{field}' missing", False, f"Field not found in response")
 
+    def create_test_image(self):
+        """Create a test image for photo upload"""
+        # Create a simple test image
+        img = Image.new('RGB', (100, 100), color='red')
+        img_bytes = io.BytesIO()
+        img.save(img_bytes, format='PNG')
+        img_bytes.seek(0)
+        return img_bytes.getvalue()
+
+    def test_photo_upload(self):
+        """Test photo upload functionality"""
+        print("\n📸 Testing Photo Upload...")
+        
+        # First, get a user to test photo upload
+        users_response = self.run_test(
+            "Get users for photo test",
+            "GET", 
+            "users",
+            200
+        )
+        
+        if not users_response or len(users_response) == 0:
+            print("   ⚠️  No users available for photo upload test")
+            return
+        
+        user_id = users_response[0]['id']
+        
+        # Test user photo upload
+        test_image = self.create_test_image()
+        
+        try:
+            url = f"{self.api_url}/users/{user_id}/photo"
+            headers = {'Authorization': f'Bearer {self.token}'}
+            files = {'file': ('test_image.png', test_image, 'image/png')}
+            
+            response = requests.post(url, headers=headers, files=files, timeout=10)
+            
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                response_data = response.json()
+                photo_url = response_data.get('photo_url')
+                if photo_url:
+                    details += f", Photo URL: {photo_url}"
+                    
+                    # Test serving the uploaded photo
+                    photo_response = requests.get(f"{self.base_url}{photo_url}", timeout=10)
+                    if photo_response.status_code == 200:
+                        self.log_test("User photo upload", True, details)
+                        self.log_test("User photo serving", True, f"Photo accessible at {photo_url}")
+                        
+                        # Test photo deletion
+                        delete_response = requests.delete(
+                            f"{self.api_url}/users/{user_id}/photo",
+                            headers=headers,
+                            timeout=10
+                        )
+                        self.log_test(
+                            "User photo deletion",
+                            delete_response.status_code == 200,
+                            f"Status: {delete_response.status_code}"
+                        )
+                    else:
+                        self.log_test("User photo serving", False, f"Photo not accessible: {photo_response.status_code}")
+                else:
+                    self.log_test("User photo upload", False, "No photo_url in response")
+            else:
+                try:
+                    error_data = response.json()
+                    details += f", Error: {error_data.get('detail', 'Unknown error')}"
+                except:
+                    details += f", Response: {response.text[:100]}"
+                self.log_test("User photo upload", False, details)
+                
+        except Exception as e:
+            self.log_test("User photo upload", False, f"Exception: {str(e)}")
+        
+        # Test contact photo upload
+        # First create a company for the contact
+        test_company_data = {
+            "name": "Photo Test Company",
+            "website": "https://phototest.com",
+            "category": "Technology"
+        }
+        
+        company_response = self.run_test(
+            "Create company for contact photo test",
+            "POST",
+            "companies",
+            200,
+            data=test_company_data
+        )
+        
+        if company_response and 'id' in company_response:
+            company_id = company_response['id']
+            
+            # Create a test contact
+            test_contact_data = {
+                "name": "Photo Test Contact",
+                "email": "phototest@example.com",
+                "company_id": company_id,
+                "position": "Test Manager"
+            }
+            
+            contact_response = self.run_test(
+                "Create contact for photo test",
+                "POST",
+                "contacts",
+                200,
+                data=test_contact_data
+            )
+            
+            if contact_response and 'id' in contact_response:
+                contact_id = contact_response['id']
+                
+                # Test contact photo upload
+                try:
+                    url = f"{self.api_url}/contacts/{contact_id}/photo"
+                    headers = {'Authorization': f'Bearer {self.token}'}
+                    files = {'file': ('test_contact_image.png', test_image, 'image/png')}
+                    
+                    response = requests.post(url, headers=headers, files=files, timeout=10)
+                    
+                    success = response.status_code == 200
+                    details = f"Status: {response.status_code}"
+                    
+                    if success:
+                        response_data = response.json()
+                        photo_url = response_data.get('photo_url')
+                        if photo_url:
+                            details += f", Photo URL: {photo_url}"
+                            
+                            # Test serving the uploaded photo
+                            photo_response = requests.get(f"{self.base_url}{photo_url}", timeout=10)
+                            if photo_response.status_code == 200:
+                                self.log_test("Contact photo upload", True, details)
+                                self.log_test("Contact photo serving", True, f"Photo accessible at {photo_url}")
+                                
+                                # Test photo deletion
+                                delete_response = requests.delete(
+                                    f"{self.api_url}/contacts/{contact_id}/photo",
+                                    headers=headers,
+                                    timeout=10
+                                )
+                                self.log_test(
+                                    "Contact photo deletion",
+                                    delete_response.status_code == 200,
+                                    f"Status: {delete_response.status_code}"
+                                )
+                            else:
+                                self.log_test("Contact photo serving", False, f"Photo not accessible: {photo_response.status_code}")
+                        else:
+                            self.log_test("Contact photo upload", False, "No photo_url in response")
+                    else:
+                        try:
+                            error_data = response.json()
+                            details += f", Error: {error_data.get('detail', 'Unknown error')}"
+                        except:
+                            details += f", Response: {response.text[:100]}"
+                        self.log_test("Contact photo upload", False, details)
+                        
+                except Exception as e:
+                    self.log_test("Contact photo upload", False, f"Exception: {str(e)}")
+                
+                # Clean up test contact
+                self.run_test(
+                    "Delete test contact",
+                    "DELETE",
+                    f"contacts/{contact_id}",
+                    200
+                )
+            
+            # Clean up test company
+            self.run_test(
+                "Delete test company",
+                "DELETE",
+                f"companies/{company_id}",
+                200
+            )
+
     def test_role_based_access(self):
         """Test role-based access control"""
         print("\n🔒 Testing Role-Based Access Control...")
