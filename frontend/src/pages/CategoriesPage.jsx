@@ -246,19 +246,19 @@ export default function CategoriesPage() {
       await axios.post(
         `${API}/settings/categories`,
         {
-          category_type: 'business_category',
+          category_type: categoryType,
           category_name: newCategoryName,
           display_order: categories.length,
           is_active: true,
         },
         getAuthHeaders()
       );
-      toast.success('Category created successfully');
+      toast.success(`${categoryType === 'exhibit_history' ? 'Exhibit' : 'Category'} created successfully`);
       setDialogOpen(false);
       setNewCategoryName('');
       fetchCategories();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to create category');
+      toast.error(error.response?.data?.detail || 'Failed to create');
     }
   };
 
