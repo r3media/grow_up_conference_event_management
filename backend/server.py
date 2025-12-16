@@ -528,6 +528,7 @@ async def create_contact(contact_data: ContactCreate, current_user: dict = Depen
         "tags": contact_data.tags,
         "notes": contact_data.notes,
         "photo_url": contact_data.photo_url,
+        "address": contact_data.address.model_dump() if contact_data.address else None,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "created_by": current_user["id"]
@@ -552,6 +553,7 @@ async def create_contact(contact_data: ContactCreate, current_user: dict = Depen
         tags=contact_dict["tags"],
         notes=contact_dict["notes"],
         photo_url=contact_dict["photo_url"],
+        address=AddressModel(**contact_dict["address"]) if contact_dict.get("address") else None,
         created_at=datetime.fromisoformat(contact_dict["created_at"]),
         updated_at=datetime.fromisoformat(contact_dict["updated_at"]),
         created_by=contact_dict["created_by"]
