@@ -549,8 +549,33 @@ export default function UserManagement() {
               </div>
 
               <div className="border-t pt-4">
-                <Label className="text-base font-semibold mb-3 block">Address (Canada)</Label>
+                <Label className="text-base font-semibold mb-3 block">Address</Label>
                 <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="country">Country</Label>
+                    <Select 
+                      value={formData.address.country} 
+                      onValueChange={(value) => setFormData({ 
+                        ...formData, 
+                        address: { 
+                          ...formData.address, 
+                          country: value,
+                          province: getProvincesForCountry(value)[0] || ''
+                        }
+                      })}
+                    >
+                      <SelectTrigger data-testid="user-address-country-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRIES.map((c) => (
+                          <SelectItem key={c.code} value={c.name}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="street">Street Address</Label>
                     <Input
@@ -571,13 +596,13 @@ export default function UserManagement() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="province">Province</Label>
+                      <Label htmlFor="province">{getProvinceLabel(formData.address.country)}</Label>
                       <Select value={formData.address.province} onValueChange={(value) => setFormData({ ...formData, address: { ...formData.address, province: value }})}>
                         <SelectTrigger data-testid="user-address-province-select">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {provinces.map((prov) => (
+                          {getProvincesForCountry(formData.address.country).map((prov) => (
                             <SelectItem key={prov} value={prov}>
                               {prov}
                             </SelectItem>
@@ -586,12 +611,12 @@ export default function UserManagement() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="postal_code">Postal Code</Label>
+                      <Label htmlFor="postal_code">{getPostalCodeLabel(formData.address.country)}</Label>
                       <Input
                         id="postal_code"
                         value={formData.address.postal_code}
                         onChange={(e) => setFormData({ ...formData, address: { ...formData.address, postal_code: e.target.value }})}
-                        placeholder="A1A 1A1"
+                        placeholder={getPostalCodePlaceholder(formData.address.country)}
                         data-testid="user-address-postal-input"
                       />
                     </div>
