@@ -233,17 +233,11 @@ export default function ContactDetail() {
               <label className="text-sm font-medium text-muted-foreground">Company</label>
               <div className="flex items-center gap-2 mt-1">
                 <Building2 className="w-4 h-4 text-muted-foreground" />
-                <InlineEdit
-                  value={contact.company_id}
-                  onSave={(v) => updateContact({ company_id: v })}
-                  type="select"
-                  options={companies.map(c => ({ value: c.id, label: c.name }))}
-                  placeholder="Select company"
-                />
+                <span className="text-sm">{contact.company_name || '-'}</span>
                 {contact.company_name && (
                   <Button
                     variant="link"
-                    className="p-0 h-auto text-primary"
+                    className="p-0 h-auto text-primary text-sm"
                     onClick={() => navigate(`/companies/${contact.company_id}`)}
                   >
                     View Company
