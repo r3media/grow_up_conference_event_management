@@ -40,8 +40,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { ArrowLeft, Globe, Building2, MapPin, Mail, Phone, Pencil, Plus, MoreVertical, Trash2 } from 'lucide-react';
+import { ArrowLeft, Globe, Building2, MapPin, Mail, Phone, Pencil, Plus, MoreVertical, Trash2, Calendar, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
