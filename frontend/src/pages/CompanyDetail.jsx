@@ -53,6 +53,95 @@ const getAuthHeaders = () => ({
 
 const provinces = ['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'];
 
+// Inline editable exhibit history component
+function ExhibitHistoryEditor({ value = [], options = [], onSave }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [selected, setSelected] = useState(value);
+
+  const handleSave = () => {
+    onSave(selected);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setSelected(value);
+    setIsEditing(false);
+  };
+
+  const toggleItem = (item) => {
+    if (selected.includes(item)) {
+      setSelected(selected.filter(s => s !== item));
+    } else {
+      setSelected([...selected, item]);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            Exhibit History
+          </label>
+          <div className="flex gap-1">
+            <Button size="icon" variant="ghost" className="h-6 w-6 text-green-600" onClick={handleSave}>
+              <Check className="w-4 h-4" />
+            </Button>
+            <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={handleCancel}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+        <div className="border rounded-md p-3 max-h-48 overflow-y-auto space-y-2">
+          {options.map((opt) => (
+            <div key={opt.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={`exhibit-edit-${opt.id}`}
+                checked={selected.includes(opt.category_name)}
+                onCheckedChange={() => toggleItem(opt.category_name)}
+              />
+              <label htmlFor={`exhibit-edit-${opt.id}`} className="text-sm cursor-pointer">
+                {opt.category_name}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="group">
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+          <Calendar className="w-4 h-4" />
+          Exhibit History
+        </label>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={() => setIsEditing(true)}
+        >
+          <Pencil className="w-3 h-3" />
+        </Button>
+      </div>
+      {value.length > 0 ? (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {value.map((item, i) => (
+            <span key={i} className="px-2 py-1 rounded-full text-xs bg-primary/10 text-primary">
+              {item}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground mt-1">No exhibit history</p>
+      )}
+    </div>
+  );
+}
+
 export default function CompanyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
