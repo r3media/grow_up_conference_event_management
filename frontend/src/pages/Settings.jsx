@@ -73,9 +73,13 @@ export default function Settings() {
             </TabsContent>
 
             <TabsContent value="user" className="mt-6">
-              <div className="text-center py-12 text-muted-foreground">
-                <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>User settings coming soon</p>
+              <div className="space-y-4">
+                <SettingLink
+                  icon={Building2}
+                  title="Departments"
+                  description="Manage department options for staff members"
+                  onClick={() => navigate('/settings/categories/department')}
+                />
               </div>
             </TabsContent>
 
