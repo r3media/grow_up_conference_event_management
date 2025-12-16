@@ -346,14 +346,12 @@ export default function EmailSettings() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="template-body">Body *</Label>
-              <Textarea
-                id="template-body"
+              <Label>Body *</Label>
+              <RichTextEditor
                 value={templateForm.body}
-                onChange={(e) => setTemplateForm({ ...templateForm, body: e.target.value })}
+                onChange={(value) => setTemplateForm({ ...templateForm, body: value })}
                 placeholder="Email body content..."
-                rows={8}
-                required
+                minHeight="200px"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -397,17 +395,13 @@ export default function EmailSettings() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="signature-content">Signature Content *</Label>
-              <Textarea
-                id="signature-content"
+              <Label>Signature Content *</Label>
+              <RichTextEditor
                 value={signatureForm.content}
-                onChange={(e) => setSignatureForm({ ...signatureForm, content: e.target.value })}
-                placeholder="Best regards,
-John Doe
-Event Manager
-Phone: (555) 123-4567"
-                rows={6}
-                required
+                onChange={(value) => setSignatureForm({ ...signatureForm, content: value })}
+                placeholder="Best regards, John Doe..."
+                minHeight="150px"
+                variant="compact"
               />
             </div>
             <div className="flex items-center gap-2">
