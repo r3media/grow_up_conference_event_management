@@ -101,3 +101,147 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Conference and Expo management system - implement photo upload for Users and Contacts, verify icon replacements"
+
+backend:
+  - task: "Photo upload endpoint for Users"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Implemented POST /api/users/{user_id}/photo endpoint. Tested with curl - successfully uploads and stores file in /app/uploads"
+
+  - task: "Photo upload endpoint for Contacts"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented POST /api/contacts/{contact_id}/photo endpoint. Needs testing."
+
+  - task: "Photo delete endpoints for Users and Contacts"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented DELETE /api/users/{user_id}/photo and DELETE /api/contacts/{contact_id}/photo endpoints"
+
+  - task: "Static file serving for uploads"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "GET /api/uploads/{filename} endpoint serves uploaded files"
+
+frontend:
+  - task: "Photo upload UI for Users"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/UserManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Added photo upload section in Add/Edit User dialog with preview, file validation, and upload on submit. Screenshots confirm UI is working."
+
+  - task: "Photo upload UI for Contacts"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/ContactManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Added photo upload section in Add/Edit Contact dialog with preview, file validation, and upload on submit. Screenshots confirm UI is working."
+
+  - task: "Display photos in User list"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/UserManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "User avatars now show uploaded photo or fallback to initials. Verified via screenshot after uploading test photo."
+
+  - task: "Display photos in Contacts list"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/ContactManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Contact avatars now show uploaded photo or fallback to initials."
+
+  - task: "Display photos in CompanyDetail contacts"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/CompanyDetail.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Avatar with photo display for contacts in company detail page"
+
+  - task: "Icon-based Edit/Delete actions"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/UserManagement.jsx, ContactManagement.jsx, CompanyManagement.jsx, CategoriesPage.jsx, CompanyDetail.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "All pages already have Pencil and Trash2 icons for Edit/Delete actions. Verified by viewing code."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Photo upload UI for Users"
+    - "Photo upload UI for Contacts"
+    - "Display photos in User list"
+    - "Display photos in Contacts list"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Implemented photo upload functionality for Users and Contacts. Backend endpoints created, frontend UI added with file input, preview, and upload on form submit. Photos are displayed in list views using Avatar component. Please test the complete flow: 1) Create/Edit user with photo upload 2) Verify photo displays in list 3) Test same flow for contacts. Use credentials: admin@demo.com / admin123"
