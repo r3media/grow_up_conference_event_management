@@ -11,6 +11,7 @@ import CompanyManagement from '@/pages/CompanyManagement';
 import CompanyDetail from '@/pages/CompanyDetail';
 import Settings from '@/pages/Settings';
 import CategoriesPage from '@/pages/CategoriesPage';
+import EmailCompose from '@/pages/EmailCompose';
 import MainLayout from '@/components/MainLayout';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -121,6 +122,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/email/compose"
+            element={
+              <ProtectedRoute>
+                <EmailCompose />
               </ProtectedRoute>
             }
           />
