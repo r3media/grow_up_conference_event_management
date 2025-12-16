@@ -534,6 +534,7 @@ class ConferenceAPITester:
         self.test_contact_management()
         self.test_company_management()
         self.test_user_management()
+        self.test_photo_upload()
         self.test_role_based_access()
         
         # Print summary
