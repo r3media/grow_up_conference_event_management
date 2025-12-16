@@ -109,6 +109,15 @@ export default function CompanyDetail() {
     }
   };
 
+  const fetchExhibitHistoryOptions = async () => {
+    try {
+      const response = await axios.get(`${API}/settings/categories?category_type=exhibit_history`, getAuthHeaders());
+      setExhibitHistoryOptions(response.data);
+    } catch (error) {
+      console.error('Failed to load exhibit history options');
+    }
+  };
+
   const updateCompany = async (updates) => {
     try {
       await axios.put(`${API}/companies/${id}`, updates, getAuthHeaders());
