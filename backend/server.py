@@ -503,6 +503,7 @@ async def get_contacts(
             tags=contact.get("tags", []),
             notes=contact.get("notes"),
             photo_url=contact.get("photo_url"),
+            address=AddressModel(**contact["address"]) if contact.get("address") else None,
             created_at=datetime.fromisoformat(contact["created_at"]),
             updated_at=datetime.fromisoformat(contact["updated_at"]),
             created_by=contact["created_by"]
