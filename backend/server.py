@@ -1096,6 +1096,398 @@ async def delete_category(
         raise HTTPException(status_code=404, detail="Category not found")
     return {"message": "Category deleted successfully"}
 
+# Email Template Routes
+@api_router.get("/email/templates", response_model=List[EmailTemplate])
+async def get_email_templates(
+    current_user: dict = Depends(get_current_user)
+):
+    templates = await db.email_templates.find({}, {"_id": 0}).sort("name", 1).to_list(1000)
+    return [EmailTemplate(
+        id=t["id"],
+        name=t["name"],
+        subject=t["subject"],
+        body=t["body"],
+        is_active=t.get("is_active", True),
+        created_at=datetime.fromisoformat(t["created_at"]),
+        updated_at=datetime.fromisoformat(t["updated_at"]),
+        created_by=t["created_by"]
+    ) for t in templates]
+
+@api_router.get("/email/templates/{template_id}", response_model=EmailTemplate)
+async def get_email_template(
+    template_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    template = await db.email_templates.find_one({"id": template_id}, {"_id": 0})
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return EmailTemplate(
+        id=template["id"],
+        name=template["name"],
+        subject=template["subject"],
+        body=template["body"],
+        is_active=template.get("is_active", True),
+        created_at=datetime.fromisoformat(template["created_at"]),
+        updated_at=datetime.fromisoformat(template["updated_at"]),
+        created_by=template["created_by"]
+    )
+
+@api_router.post("/email/templates", response_model=EmailTemplate)
+async def create_email_template(
+    template_data: EmailTemplateCreate,
+    current_user: dict = Depends(require_role(["Super Admin", "Event Manager"]))
+):
+    template_dict = {
+        "id": str(uuid.uuid4()),
+        "name": template_data.name,
+        "subject": template_data.subject,
+        "body": template_data.body,
+        "is_active": template_data.is_active,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": current_user["id"]
+    }
+    await db.email_templates.insert_one(template_dict)
+    return EmailTemplate(
+        id=template_dict["id"],
+        name=template_dict["name"],
+        subject=template_dict["subject"],
+        body=template_dict["body"],
+        is_active=template_dict["is_active"],
+        created_at=datetime.fromisoformat(template_dict["created_at"]),
+        updated_at=datetime.fromisoformat(template_dict["updated_at"]),
+        created_by=template_dict["created_by"]
+    )
+
+@api_router.put("/email/templates/{template_id}", response_model=EmailTemplate)
+async def update_email_template(
+    template_id: str,
+    template_data: EmailTemplateUpdate,
+    current_user: dict = Depends(require_role(["Super Admin", "Event Manager"]))
+):
+    template = await db.email_templates.find_one({"id": template_id})
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    update_dict = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    if template_data.name is not None:
+        update_dict["name"] = template_data.name
+    if template_data.subject is not None:
+        update_dict["subject"] = template_data.subject
+    if template_data.body is not None:
+        update_dict["body"] = template_data.body
+    if template_data.is_active is not None:
+        update_dict["is_active"] = template_data.is_active
+    
+    await db.email_templates.update_one({"id": template_id}, {"$set": update_dict})
+    updated = await db.email_templates.find_one({"id": template_id}, {"_id": 0})
+    return EmailTemplate(
+        id=updated["id"],
+        name=updated["name"],
+        subject=updated["subject"],
+        body=updated["body"],
+        is_active=updated.get("is_active", True),
+        created_at=datetime.fromisoformat(updated["created_at"]),
+        updated_at=datetime.fromisoformat(updated["updated_at"]),
+        created_by=updated["created_by"]
+    )
+
+@api_router.delete("/email/templates/{template_id}")
+async def delete_email_template(
+    template_id: str,
+    current_user: dict = Depends(require_role(["Super Admin", "Event Manager"]))
+):
+    result = await db.email_templates.delete_one({"id": template_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return {"message": "Template deleted successfully"}
+
+# Email Signature Routes (per-user)
+@api_router.get("/email/signatures", response_model=List[EmailSignature])
+async def get_email_signatures(
+    current_user: dict = Depends(get_current_user)
+):
+    signatures = await db.email_signatures.find(
+        {"user_id": current_user["id"]}, {"_id": 0}
+    ).sort("name", 1).to_list(100)
+    return [EmailSignature(
+        id=s["id"],
+        name=s["name"],
+        content=s["content"],
+        is_default=s.get("is_default", False),
+        user_id=s["user_id"],
+        created_at=datetime.fromisoformat(s["created_at"]),
+        updated_at=datetime.fromisoformat(s["updated_at"])
+    ) for s in signatures]
+
+@api_router.post("/email/signatures", response_model=EmailSignature)
+async def create_email_signature(
+    signature_data: EmailSignatureCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    # If setting as default, unset other defaults
+    if signature_data.is_default:
+        await db.email_signatures.update_many(
+            {"user_id": current_user["id"]},
+            {"$set": {"is_default": False}}
+        )
+    
+    signature_dict = {
+        "id": str(uuid.uuid4()),
+        "name": signature_data.name,
+        "content": signature_data.content,
+        "is_default": signature_data.is_default,
+        "user_id": current_user["id"],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.email_signatures.insert_one(signature_dict)
+    return EmailSignature(
+        id=signature_dict["id"],
+        name=signature_dict["name"],
+        content=signature_dict["content"],
+        is_default=signature_dict["is_default"],
+        user_id=signature_dict["user_id"],
+        created_at=datetime.fromisoformat(signature_dict["created_at"]),
+        updated_at=datetime.fromisoformat(signature_dict["updated_at"])
+    )
+
+@api_router.put("/email/signatures/{signature_id}", response_model=EmailSignature)
+async def update_email_signature(
+    signature_id: str,
+    signature_data: EmailSignatureUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    signature = await db.email_signatures.find_one({
+        "id": signature_id,
+        "user_id": current_user["id"]
+    })
+    if not signature:
+        raise HTTPException(status_code=404, detail="Signature not found")
+    
+    # If setting as default, unset other defaults
+    if signature_data.is_default:
+        await db.email_signatures.update_many(
+            {"user_id": current_user["id"], "id": {"$ne": signature_id}},
+            {"$set": {"is_default": False}}
+        )
+    
+    update_dict = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    if signature_data.name is not None:
+        update_dict["name"] = signature_data.name
+    if signature_data.content is not None:
+        update_dict["content"] = signature_data.content
+    if signature_data.is_default is not None:
+        update_dict["is_default"] = signature_data.is_default
+    
+    await db.email_signatures.update_one({"id": signature_id}, {"$set": update_dict})
+    updated = await db.email_signatures.find_one({"id": signature_id}, {"_id": 0})
+    return EmailSignature(
+        id=updated["id"],
+        name=updated["name"],
+        content=updated["content"],
+        is_default=updated.get("is_default", False),
+        user_id=updated["user_id"],
+        created_at=datetime.fromisoformat(updated["created_at"]),
+        updated_at=datetime.fromisoformat(updated["updated_at"])
+    )
+
+@api_router.delete("/email/signatures/{signature_id}")
+async def delete_email_signature(
+    signature_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    result = await db.email_signatures.delete_one({
+        "id": signature_id,
+        "user_id": current_user["id"]
+    })
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Signature not found")
+    return {"message": "Signature deleted successfully"}
+
+# Email Routes
+@api_router.get("/emails", response_model=List[Email])
+async def get_emails(
+    email_address: Optional[str] = None,
+    status: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    query = {}
+    if email_address:
+        # Search in to, cc, bcc addresses
+        query["$or"] = [
+            {"to_addresses": email_address},
+            {"cc_addresses": email_address},
+            {"bcc_addresses": email_address}
+        ]
+    if status:
+        query["status"] = status
+    
+    emails = await db.emails.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    result = []
+    for e in emails:
+        user = await db.users.find_one({"id": e["created_by"]}, {"_id": 0, "name": 1})
+        result.append(Email(
+            id=e["id"],
+            to_addresses=e["to_addresses"],
+            cc_addresses=e.get("cc_addresses", []),
+            bcc_addresses=e.get("bcc_addresses", []),
+            subject=e["subject"],
+            body=e["body"],
+            priority=e.get("priority", "normal"),
+            template_id=e.get("template_id"),
+            signature_id=e.get("signature_id"),
+            status=e.get("status", "draft"),
+            sent_at=datetime.fromisoformat(e["sent_at"]) if e.get("sent_at") else None,
+            attachments=[EmailAttachment(**a) for a in e.get("attachments", [])],
+            created_at=datetime.fromisoformat(e["created_at"]),
+            updated_at=datetime.fromisoformat(e["updated_at"]),
+            created_by=e["created_by"],
+            created_by_name=user["name"] if user else None
+        ))
+    return result
+
+@api_router.get("/emails/{email_id}", response_model=Email)
+async def get_email(
+    email_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    email = await db.emails.find_one({"id": email_id}, {"_id": 0})
+    if not email:
+        raise HTTPException(status_code=404, detail="Email not found")
+    
+    user = await db.users.find_one({"id": email["created_by"]}, {"_id": 0, "name": 1})
+    return Email(
+        id=email["id"],
+        to_addresses=email["to_addresses"],
+        cc_addresses=email.get("cc_addresses", []),
+        bcc_addresses=email.get("bcc_addresses", []),
+        subject=email["subject"],
+        body=email["body"],
+        priority=email.get("priority", "normal"),
+        template_id=email.get("template_id"),
+        signature_id=email.get("signature_id"),
+        status=email.get("status", "draft"),
+        sent_at=datetime.fromisoformat(email["sent_at"]) if email.get("sent_at") else None,
+        attachments=[EmailAttachment(**a) for a in email.get("attachments", [])],
+        created_at=datetime.fromisoformat(email["created_at"]),
+        updated_at=datetime.fromisoformat(email["updated_at"]),
+        created_by=email["created_by"],
+        created_by_name=user["name"] if user else None
+    )
+
+@api_router.post("/emails", response_model=Email)
+async def create_email(
+    email_data: EmailCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    email_dict = {
+        "id": str(uuid.uuid4()),
+        "to_addresses": email_data.to_addresses,
+        "cc_addresses": email_data.cc_addresses,
+        "bcc_addresses": email_data.bcc_addresses,
+        "subject": email_data.subject,
+        "body": email_data.body,
+        "priority": email_data.priority,
+        "template_id": email_data.template_id,
+        "signature_id": email_data.signature_id,
+        "status": "draft",
+        "sent_at": None,
+        "attachments": [],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": current_user["id"]
+    }
+    await db.emails.insert_one(email_dict)
+    return Email(
+        id=email_dict["id"],
+        to_addresses=email_dict["to_addresses"],
+        cc_addresses=email_dict["cc_addresses"],
+        bcc_addresses=email_dict["bcc_addresses"],
+        subject=email_dict["subject"],
+        body=email_dict["body"],
+        priority=email_dict["priority"],
+        template_id=email_dict.get("template_id"),
+        signature_id=email_dict.get("signature_id"),
+        status=email_dict["status"],
+        sent_at=None,
+        attachments=[],
+        created_at=datetime.fromisoformat(email_dict["created_at"]),
+        updated_at=datetime.fromisoformat(email_dict["updated_at"]),
+        created_by=email_dict["created_by"],
+        created_by_name=current_user["name"]
+    )
+
+@api_router.post("/emails/{email_id}/send")
+async def send_email(
+    email_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    email = await db.emails.find_one({"id": email_id})
+    if not email:
+        raise HTTPException(status_code=404, detail="Email not found")
+    
+    # For now, just mark as sent (mocked - will integrate with 365 later)
+    await db.emails.update_one(
+        {"id": email_id},
+        {"$set": {
+            "status": "sent",
+            "sent_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    return {"message": "Email sent successfully (mocked)", "status": "sent"}
+
+@api_router.delete("/emails/{email_id}")
+async def delete_email(
+    email_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    result = await db.emails.delete_one({"id": email_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Email not found")
+    return {"message": "Email deleted successfully"}
+
+# Email Attachment Upload
+ATTACHMENT_DIR = Path("/app/uploads/attachments")
+ATTACHMENT_DIR.mkdir(parents=True, exist_ok=True)
+ATTACHMENT_EXTENSIONS = {".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv", ".jpg", ".jpeg", ".png", ".gif", ".zip"}
+MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024  # 10MB
+
+@api_router.post("/emails/attachments")
+async def upload_email_attachment(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    file_ext = Path(file.filename).suffix.lower()
+    if file_ext not in ATTACHMENT_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Invalid file type. Allowed: {', '.join(ATTACHMENT_EXTENSIONS)}")
+    
+    content = await file.read()
+    if len(content) > MAX_ATTACHMENT_SIZE:
+        raise HTTPException(status_code=400, detail="File size exceeds 10MB limit")
+    
+    unique_filename = f"attachment_{uuid.uuid4().hex[:8]}{file_ext}"
+    file_path = ATTACHMENT_DIR / unique_filename
+    
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    return {
+        "filename": file.filename,
+        "file_url": f"/api/uploads/attachments/{unique_filename}",
+        "file_size": len(content),
+        "mime_type": file.content_type or "application/octet-stream"
+    }
+
+@api_router.get("/uploads/attachments/{filename}")
+async def get_attachment_file(filename: str):
+    file_path = ATTACHMENT_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    from fastapi.responses import FileResponse
+    return FileResponse(file_path)
+
 # Photo Upload Routes
 UPLOAD_DIR = Path("/app/uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
