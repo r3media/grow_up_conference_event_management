@@ -431,13 +431,23 @@ export default function CompanyDetail() {
                 {contacts.map((contact) => (
                   <TableRow key={contact.id}>
                     <TableCell>
-                      <button
-                        onClick={() => openEditContactDialog(contact)}
-                        className="font-medium text-primary hover:underline text-left"
-                        data-testid={`company-contact-name-link-${contact.id}`}
-                      >
-                        {contact.name}
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-8 h-8">
+                          {contact.photo_url ? (
+                            <AvatarImage src={`${BACKEND_URL}${contact.photo_url}`} alt={contact.name} />
+                          ) : null}
+                          <AvatarFallback className="bg-secondary text-secondary-foreground text-sm">
+                            {contact.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <button
+                          onClick={() => openEditContactDialog(contact)}
+                          className="font-medium text-primary hover:underline text-left"
+                          data-testid={`company-contact-name-link-${contact.id}`}
+                        >
+                          {contact.name}
+                        </button>
+                      </div>
                     </TableCell>
                     <TableCell>
                       {contact.email ? (
