@@ -63,6 +63,12 @@ export default function Settings() {
                   description="Manage business categories for company classification"
                   onClick={() => navigate('/settings/categories/business')}
                 />
+                <SettingLink
+                  icon={Calendar}
+                  title="Exhibit History"
+                  description="Manage exhibit/event history options for companies"
+                  onClick={() => navigate('/settings/categories/exhibit_history')}
+                />
               </div>
             </TabsContent>
 
