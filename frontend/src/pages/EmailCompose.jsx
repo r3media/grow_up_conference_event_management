@@ -265,15 +265,12 @@ export default function EmailCompose() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="body">Message</Label>
-                  <Textarea
-                    id="body"
+                  <Label>Message</Label>
+                  <RichTextEditor
                     value={formData.body}
-                    onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+                    onChange={(value) => setFormData({ ...formData, body: value })}
                     placeholder="Write your message..."
-                    rows={12}
-                    className="resize-none"
-                    data-testid="email-body-input"
+                    minHeight="250px"
                   />
                 </div>
 
@@ -281,7 +278,10 @@ export default function EmailCompose() {
                 {formData.signatureId && formData.signatureId !== 'none' && (
                   <div className="p-3 bg-muted/50 rounded-md border">
                     <p className="text-xs text-muted-foreground mb-1">Signature Preview:</p>
-                    <div className="text-sm whitespace-pre-wrap">{getSelectedSignatureContent()}</div>
+                    <div 
+                      className="text-sm prose prose-sm dark:prose-invert max-w-none"
+                      dangerouslySetInnerHTML={{ __html: getSelectedSignatureContent() }}
+                    />
                   </div>
                 )}
 
