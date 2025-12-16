@@ -166,6 +166,13 @@ export default function CategoriesPage() {
   const [sortBy, setSortBy] = useState('category_name');
   const [sortOrder, setSortOrder] = useState('asc');
 
+  // Determine category type from URL
+  const categoryType = window.location.pathname.includes('exhibit_history') ? 'exhibit_history' : 'business_category';
+  const pageTitle = categoryType === 'exhibit_history' ? 'Exhibit History' : 'Business Categories';
+  const pageDescription = categoryType === 'exhibit_history' 
+    ? 'Manage exhibit/event history options for companies'
+    : 'Manage business categories for company classification';
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -175,12 +182,12 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     fetchCategories();
-  }, [sortBy, sortOrder]);
+  }, [sortBy, sortOrder, categoryType]);
 
   const fetchCategories = async () => {
     try {
       const response = await axios.get(
-        `${API}/settings/categories?category_type=business_category`,
+        `${API}/settings/categories?category_type=${categoryType}`,
         getAuthHeaders()
       );
       let sorted = [...response.data];
