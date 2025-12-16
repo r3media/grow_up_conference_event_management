@@ -52,9 +52,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Plus, MoreVertical, Pencil, Trash2, Mail, Phone, Building2, Search, ArrowUp, ArrowDown, Camera, X, Check, ChevronsUpDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Mail, Phone, Building2, Search, ArrowUp, ArrowDown, Camera, X, Check, ChevronsUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { ColumnCustomizer, useColumnPreferences } from '@/components/ColumnCustomizer';
+import { COUNTRIES, getProvincesForCountry, getProvinceLabel, getPostalCodeLabel, getPostalCodePlaceholder } from '@/lib/addressData';
 import { cn } from '@/lib/utils';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -71,6 +72,7 @@ const ALL_COLUMNS = [
   { key: 'phone', label: 'Phone', sortable: false },
   { key: 'company', label: 'Company', sortable: true },
   { key: 'position', label: 'Position', sortable: true },
+  { key: 'city', label: 'City', sortable: true },
   { key: 'tags', label: 'Tags', sortable: false },
   { key: 'notes', label: 'Notes', sortable: false },
 ];
