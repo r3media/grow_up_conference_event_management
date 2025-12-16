@@ -436,7 +436,7 @@ Phone: (555) 123-4567"
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the {deleteType} "{deleteItem?.name}".
+              This will permanently delete the {deleteType} &quot;{deleteItem?.name}&quot;.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
