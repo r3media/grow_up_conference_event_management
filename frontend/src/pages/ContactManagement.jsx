@@ -64,6 +64,7 @@ import { toast } from 'sonner';
 import { ColumnCustomizer, useColumnPreferences } from '@/components/ColumnCustomizer';
 import { COUNTRIES, getProvincesForCountry, getProvinceLabel, getPostalCodeLabel, getPostalCodePlaceholder } from '@/lib/addressData';
 import { cn } from '@/lib/utils';
+import EmailLink from '@/components/EmailLink';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -352,12 +353,7 @@ export default function ContactManagement() {
           </button>
         ) : '-';
       case 'email':
-        return contact.email ? (
-          <div className="flex items-center gap-2 text-sm">
-            <Mail className="w-4 h-4 text-muted-foreground" />
-            {contact.email}
-          </div>
-        ) : '-';
+        return <EmailLink email={contact.email} />;
       case 'phone':
         return contact.phone ? (
           <div className="flex items-center gap-2 text-sm">
