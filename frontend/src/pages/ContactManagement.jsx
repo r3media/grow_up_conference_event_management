@@ -633,6 +633,83 @@ export default function ContactManagement() {
                   data-testid="contact-notes-input"
                 />
               </div>
+
+              <div className="border-t pt-4">
+                <Label className="text-base font-semibold mb-3 block">Personal Address</Label>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="country">Country</Label>
+                    <Select 
+                      value={formData.address.country} 
+                      onValueChange={(value) => setFormData({ 
+                        ...formData, 
+                        address: { 
+                          ...formData.address, 
+                          country: value,
+                          province: getProvincesForCountry(value)[0] || ''
+                        }
+                      })}
+                    >
+                      <SelectTrigger data-testid="contact-address-country-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRIES.map((c) => (
+                          <SelectItem key={c.code} value={c.name}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="street">Street Address</Label>
+                    <Input
+                      id="street"
+                      value={formData.address.street}
+                      onChange={(e) => setFormData({ ...formData, address: { ...formData.address, street: e.target.value }})}
+                      data-testid="contact-address-street-input"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        value={formData.address.city}
+                        onChange={(e) => setFormData({ ...formData, address: { ...formData.address, city: e.target.value }})}
+                        data-testid="contact-address-city-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="province">{getProvinceLabel(formData.address.country)}</Label>
+                      <Select value={formData.address.province} onValueChange={(value) => setFormData({ ...formData, address: { ...formData.address, province: value }})}>
+                        <SelectTrigger data-testid="contact-address-province-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getProvincesForCountry(formData.address.country).map((prov) => (
+                            <SelectItem key={prov} value={prov}>
+                              {prov}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="postal_code">{getPostalCodeLabel(formData.address.country)}</Label>
+                      <Input
+                        id="postal_code"
+                        value={formData.address.postal_code}
+                        onChange={(e) => setFormData({ ...formData, address: { ...formData.address, postal_code: e.target.value }})}
+                        placeholder={getPostalCodePlaceholder(formData.address.country)}
+                        data-testid="contact-address-postal-input"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancel
