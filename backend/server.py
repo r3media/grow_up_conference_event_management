@@ -737,6 +737,7 @@ async def get_company(company_id: str, current_user: dict = Depends(get_current_
         category=company.get("category"),
         description=company.get("description"),
         address=AddressModel(**company["address"]) if company.get("address") else None,
+        exhibit_history=company.get("exhibit_history", []),
         contacts_count=company.get("contacts_count", 0),
         created_at=datetime.fromisoformat(company["created_at"]),
         updated_at=datetime.fromisoformat(company["updated_at"]),
