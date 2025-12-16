@@ -776,6 +776,7 @@ async def create_company(company_data: CompanyCreate, current_user: dict = Depen
         "description": company_data.description,
         "address": company_data.address.model_dump() if company_data.address else None,
         "exhibit_history": company_data.exhibit_history,
+        "sales_rep_id": company_data.sales_rep_id,
         "contacts_count": 0,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -783,6 +784,13 @@ async def create_company(company_data: CompanyCreate, current_user: dict = Depen
     }
     
     await db.companies.insert_one(company_dict)
+    
+    # Get sales rep name
+    sales_rep_name = None
+    if company_dict.get("sales_rep_id"):
+        sales_rep = await db.users.find_one({"id": company_dict["sales_rep_id"]}, {"_id": 0, "name": 1})
+        if sales_rep:
+            sales_rep_name = sales_rep["name"]
     
     return Company(
         id=company_dict["id"],
