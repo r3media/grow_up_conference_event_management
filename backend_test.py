@@ -201,6 +201,130 @@ class ConferenceAPITester:
             success, response, status = self.make_request("DELETE", f"users/{user_id}", expected_status=200)
             self.log_test("Clean up test user", success, f"Status: {status}")
 
+    def test_email_templates(self):
+        """Test email template functionality"""
+        print("\n=== Testing Email Templates ===")
+        
+        # Test getting email templates
+        success, response, status = self.make_request("GET", "email/templates")
+        self.log_test("Get email templates", success, f"Status: {status}")
+        
+        if success:
+            templates = response
+            print(f"   Found {len(templates)} email templates")
+        
+        # Test creating email template
+        template_data = {
+            "name": f"Test Template {datetime.now().strftime('%H%M%S')}",
+            "subject": "Test Email Subject",
+            "body": "This is a test email template body.",
+            "is_active": True
+        }
+        
+        success, response, status = self.make_request("POST", "email/templates", template_data, 200)
+        self.log_test("Create email template", success, f"Status: {status}")
+        
+        if success:
+            template_id = response.get('id')
+            
+            # Test updating template
+            update_data = {
+                "subject": "Updated Test Email Subject",
+                "is_active": False
+            }
+            
+            success, response, status = self.make_request("PUT", f"email/templates/{template_id}", update_data)
+            self.log_test("Update email template", success, f"Status: {status}")
+            
+            # Test getting specific template
+            success, response, status = self.make_request("GET", f"email/templates/{template_id}")
+            self.log_test("Get specific email template", success, f"Status: {status}")
+            
+            # Clean up - delete test template
+            success, response, status = self.make_request("DELETE", f"email/templates/{template_id}", expected_status=200)
+            self.log_test("Delete test email template", success, f"Status: {status}")
+
+    def test_email_signatures(self):
+        """Test email signature functionality"""
+        print("\n=== Testing Email Signatures ===")
+        
+        # Test getting email signatures
+        success, response, status = self.make_request("GET", "email/signatures")
+        self.log_test("Get email signatures", success, f"Status: {status}")
+        
+        if success:
+            signatures = response
+            print(f"   Found {len(signatures)} email signatures")
+        
+        # Test creating email signature
+        signature_data = {
+            "name": f"Test Signature {datetime.now().strftime('%H%M%S')}",
+            "content": "Best regards,\nTest User\nEvent Manager\nPhone: (555) 123-4567",
+            "is_default": False
+        }
+        
+        success, response, status = self.make_request("POST", "email/signatures", signature_data, 200)
+        self.log_test("Create email signature", success, f"Status: {status}")
+        
+        if success:
+            signature_id = response.get('id')
+            
+            # Test updating signature
+            update_data = {
+                "is_default": True
+            }
+            
+            success, response, status = self.make_request("PUT", f"email/signatures/{signature_id}", update_data)
+            self.log_test("Update email signature (set as default)", success, f"Status: {status}")
+            
+            # Clean up - delete test signature
+            success, response, status = self.make_request("DELETE", f"email/signatures/{signature_id}", expected_status=200)
+            self.log_test("Delete test email signature", success, f"Status: {status}")
+
+    def test_email_functionality(self):
+        """Test email creation and sending functionality"""
+        print("\n=== Testing Email Functionality ===")
+        
+        # Test getting emails
+        success, response, status = self.make_request("GET", "emails")
+        self.log_test("Get emails", success, f"Status: {status}")
+        
+        if success:
+            emails = response
+            print(f"   Found {len(emails)} emails")
+        
+        # Test creating email draft
+        email_data = {
+            "to_addresses": ["test@example.com"],
+            "cc_addresses": ["cc@example.com"],
+            "bcc_addresses": [],
+            "subject": f"Test Email {datetime.now().strftime('%H%M%S')}",
+            "body": "This is a test email body.",
+            "priority": "normal",
+            "attachments": []
+        }
+        
+        success, response, status = self.make_request("POST", "emails", email_data, 200)
+        self.log_test("Create email draft", success, f"Status: {status}")
+        
+        if success:
+            email_id = response.get('id')
+            
+            # Test getting specific email
+            success, response, status = self.make_request("GET", f"emails/{email_id}")
+            self.log_test("Get specific email", success, f"Status: {status}")
+            
+            # Test sending email (mocked)
+            success, response, status = self.make_request("POST", f"emails/{email_id}/send", expected_status=200)
+            self.log_test("Send email (mocked)", success, f"Status: {status}")
+            
+            if success:
+                print(f"   Email send response: {response.get('message', 'No message')}")
+            
+            # Clean up - delete test email
+            success, response, status = self.make_request("DELETE", f"emails/{email_id}", expected_status=200)
+            self.log_test("Delete test email", success, f"Status: {status}")
+
     def run_all_tests(self):
         """Run all tests"""
         print("🚀 Starting Conference Management System API Tests")
