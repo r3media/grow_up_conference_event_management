@@ -228,7 +228,8 @@ export const Contacts = () => {
                     {contact.type}
                   </span>
                 </div>
-                <div className="space-y-2 text-sm text-slate-600">
+                
+                <div className="space-y-2 text-sm text-slate-600 mb-4">
                   {contact.company && (
                     <div className="flex items-center">
                       <Building2 size={16} className="mr-2 text-slate-400" />
@@ -243,6 +244,33 @@ export const Contacts = () => {
                     <div className="text-xs text-slate-500">Booth: {contact.booth_number}</div>
                   )}
                 </div>
+
+                {/* QR Code Section */}
+                {contact.qr_code && (
+                  <div className="border-t border-slate-200 pt-4 mt-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-medium text-slate-600">Scan QR Code</p>
+                      <a
+                        href={`/contact/${contact.contact_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                      >
+                        View Page
+                      </a>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-4 flex justify-center">
+                      <img
+                        src={contact.qr_code}
+                        alt={`QR Code for ${contact.name}`}
+                        className="w-32 h-32 border-2 border-white rounded-lg shadow-sm"
+                      />
+                    </div>
+                    <p className="text-xs text-slate-500 text-center mt-2">
+                      Scan to view contact details
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
