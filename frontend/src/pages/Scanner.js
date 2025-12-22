@@ -150,23 +150,36 @@ export const Scanner = () => {
         )}
 
         {scanning && (
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">Scanning...</h3>
+          <div className="bg-white rounded-xl border border-slate-200 p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-semibold text-slate-900">Camera Active</h3>
+                <p className="text-sm text-slate-600 mt-1">Position the QR code within the camera view</p>
+              </div>
               <Button
                 onClick={stopScanning}
                 data-testid="stop-scanning-button"
-                variant="secondary"
-                size="sm"
+                variant="destructive"
+                size="lg"
               >
-                <X size={16} className="mr-2" />
-                Stop
+                <X size={20} className="mr-2" />
+                Stop Scanning
               </Button>
             </div>
-            <div id="qr-reader" className="w-full"></div>
-            <p className="text-sm text-slate-600 text-center mt-4">
-              Position the QR code within the camera view
-            </p>
+            <div id="qr-reader" className="w-full rounded-lg overflow-hidden"></div>
+            <div className="mt-6 bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <Camera className="text-indigo-600 flex-shrink-0 mt-0.5" size={20} />
+                <div className="text-sm text-indigo-900">
+                  <p className="font-semibold mb-1">Scanning Tips:</p>
+                  <ul className="list-disc list-inside space-y-1 text-indigo-700">
+                    <li>Hold your device steady and ensure good lighting</li>
+                    <li>Position the QR code within the highlighted square</li>
+                    <li>Contact information will appear automatically when scanned</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
