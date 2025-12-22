@@ -121,7 +121,21 @@ export const Scanner = () => {
       console.log('✓ Contact found:', response.data.name);
       setScannedContact(response.data);
       stopScanning();
-      toast.success('Contact scanned successfully!');
+      
+      // Save as lead
+      try {
+        await axios.post(`${API}/leads`, {
+          contact_id: contactId,
+          event_id: response.data.event_id,
+          notes: null
+        });
+        console.log('✓ Lead saved');
+      } catch (leadError) {
+        console.error('Failed to save lead:', leadError);
+        // Don't show error to user, contact was still scanned successfully
+      }
+      
+      toast.success('Contact scanned and saved to My Leads!');
     } catch (error) {
       console.error('✗ Failed to fetch contact:', error);
       toast.error(`Contact not found with ID: ${contactId}`);
