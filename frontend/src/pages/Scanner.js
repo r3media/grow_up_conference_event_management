@@ -35,9 +35,10 @@ export const Scanner = () => {
         'qr-reader',
         { 
           fps: 10,
-          qrbox: { width: 250, height: 250 },
+          qrbox: { width: 350, height: 350 },
           aspectRatio: 1.0,
-          showTorchButtonIfSupported: true
+          showTorchButtonIfSupported: true,
+          formatsToSupport: [0] // QR_CODE
         },
         false
       );
@@ -58,15 +59,20 @@ export const Scanner = () => {
   const onScanSuccess = async (decodedText) => {
     console.log('QR Code scanned:', decodedText);
     
-    // Extract contact ID from URL
-    // Expected format: https://eventpass-32.preview.emergentagent.com/contact/{contact_id}
+    // Extract contact ID from URL - handle multiple formats
     let contactId = null;
     
+    // Try different URL patterns
     if (decodedText.includes('/contact/')) {
+      // Format: https://eventpass-32.preview.emergentagent.com/contact/{contact_id}
       const parts = decodedText.split('/contact/');
-      contactId = parts[1];
+      contactId = parts[1].split('?')[0].split('#')[0]; // Remove query params or hash
+    } else if (decodedText.match(/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i)) {
+      // Direct UUID format
+      contactId = decodedText;
     } else {
-      toast.error('Invalid QR code format');
+      console.error('Invalid QR code format:', decodedText);
+      toast.error('Invalid QR code format. Please scan an EventPass contact QR code.');
       return;
     }
 
@@ -79,7 +85,7 @@ export const Scanner = () => {
         toast.success('Contact scanned successfully!');
       } catch (error) {
         console.error('Failed to fetch contact:', error);
-        toast.error('Failed to load contact details');
+        toast.error('Contact not found. Please try again.');
       }
     }
   };
