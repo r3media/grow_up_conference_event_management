@@ -915,6 +915,115 @@ async def delete_ticket(ticket_id: str, current_user: dict = Depends(get_current
         raise HTTPException(status_code=404, detail="Ticket not found")
     return {"message": "Ticket deleted successfully"}
 
+# ===== LEADS / SCANNED CONTACTS =====
+
+@api_router.post("/leads", response_model=LeadResponse)
+async def save_lead(lead: LeadCreate, current_user: dict = Depends(get_current_user)):
+    """Save a scanned contact as a lead"""
+    # Get contact details
+    contact = await db.contacts.find_one({"contact_id": lead.contact_id}, {"_id": 0})
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    
+    # Check if lead already exists for this user
+    existing = await db.leads.find_one({
+        "user_id": current_user["user_id"],
+        "contact_id": lead.contact_id
+    }, {"_id": 0})
+    
+    if existing:
+        # Return existing lead
+        existing["scanned_at"] = datetime.fromisoformat(existing["scanned_at"])
+        return LeadResponse(**existing)
+    
+    lead_id = str(uuid.uuid4())
+    lead_doc = {
+        "lead_id": lead_id,
+        "tenant_id": current_user["tenant_id"],
+        "user_id": current_user["user_id"],
+        "event_id": lead.event_id,
+        "contact_id": lead.contact_id,
+        "contact_name": contact["name"],
+        "contact_email": contact["email"],
+        "contact_company": contact.get("company"),
+        "contact_title": contact.get("title"),
+        "contact_phone": contact.get("phone"),
+        "contact_type": contact["type"],
+        "notes": lead.notes,
+        "scanned_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.leads.insert_one(lead_doc)
+    lead_doc["scanned_at"] = datetime.fromisoformat(lead_doc["scanned_at"])
+    return LeadResponse(**lead_doc)
+
+@api_router.get("/leads", response_model=List[LeadResponse])
+async def get_leads(event_id: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Get all leads for current user"""
+    query = {"user_id": current_user["user_id"]}
+    if event_id:
+        query["event_id"] = event_id
+    
+    leads = await db.leads.find(query, {"_id": 0}).sort("scanned_at", -1).to_list(1000)
+    for lead in leads:
+        lead["scanned_at"] = datetime.fromisoformat(lead["scanned_at"])
+    return [LeadResponse(**l) for l in leads]
+
+@api_router.get("/leads/export")
+async def export_leads_csv(event_id: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Export leads as CSV"""
+    query = {"user_id": current_user["user_id"]}
+    if event_id:
+        query["event_id"] = event_id
+    
+    leads = await db.leads.find(query, {"_id": 0}).sort("scanned_at", -1).to_list(10000)
+    
+    # Create CSV content
+    import csv
+    from io import StringIO
+    
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    # Write header
+    writer.writerow([
+        "Name", "Email", "Company", "Title", "Phone", "Type", 
+        "Notes", "Scanned At", "Event ID", "Contact ID"
+    ])
+    
+    # Write data
+    for lead in leads:
+        writer.writerow([
+            lead.get("contact_name", ""),
+            lead.get("contact_email", ""),
+            lead.get("contact_company", ""),
+            lead.get("contact_title", ""),
+            lead.get("contact_phone", ""),
+            lead.get("contact_type", ""),
+            lead.get("notes", ""),
+            lead.get("scanned_at", ""),
+            lead.get("event_id", ""),
+            lead.get("contact_id", "")
+        ])
+    
+    csv_content = output.getvalue()
+    
+    from fastapi.responses import Response
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=leads_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
+        }
+    )
+
+@api_router.delete("/leads/{lead_id}")
+async def delete_lead(lead_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.leads.delete_one({"lead_id": lead_id, "user_id": current_user["user_id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return {"message": "Lead deleted successfully"}
+
 @api_router.post("/webhook/stripe")
 async def stripe_webhook(request: Request):
     body = await request.body()
