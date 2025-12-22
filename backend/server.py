@@ -203,6 +203,27 @@ class TicketResponse(BaseModel):
     end_sale: Optional[str] = None
     created_at: datetime
 
+class LeadCreate(BaseModel):
+    contact_id: str
+    event_id: str
+    notes: Optional[str] = None
+
+class LeadResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    lead_id: str
+    tenant_id: str
+    user_id: str
+    event_id: str
+    contact_id: str
+    contact_name: str
+    contact_email: str
+    contact_company: Optional[str] = None
+    contact_title: Optional[str] = None
+    contact_phone: Optional[str] = None
+    contact_type: str
+    notes: Optional[str] = None
+    scanned_at: datetime
+
 # ===== AUTH UTILITIES =====
 
 def verify_password(plain_password, hashed_password):
