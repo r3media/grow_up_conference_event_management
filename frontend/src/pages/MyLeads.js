@@ -113,7 +113,7 @@ export const MyLeads = () => {
           </div>
           <div className="flex items-center space-x-4">
             <div className="w-64">
-              <Select value={selectedEvent} onValueChange={setSelectedEvent}>
+              <Select value={selectedEvent || ""} onValueChange={setSelectedEvent}>
                 <SelectTrigger data-testid="event-filter-select">
                   <SelectValue placeholder="All Events" />
                 </SelectTrigger>
