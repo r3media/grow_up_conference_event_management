@@ -29,19 +29,22 @@ export const Scanner = () => {
     setScanning(true);
     setScannedContact(null);
 
-    const scanner = new Html5QrcodeScanner(
-      'qr-reader',
-      { 
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-        showTorchButtonIfSupported: true
-      },
-      false
-    );
+    // Wait for React to render the qr-reader div before initializing scanner
+    setTimeout(() => {
+      const scanner = new Html5QrcodeScanner(
+        'qr-reader',
+        { 
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+          showTorchButtonIfSupported: true
+        },
+        false
+      );
 
-    scanner.render(onScanSuccess, onScanError);
-    scannerRef.current = scanner;
+      scanner.render(onScanSuccess, onScanError);
+      scannerRef.current = scanner;
+    }, 100);
   };
 
   const stopScanning = () => {
