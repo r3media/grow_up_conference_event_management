@@ -15,7 +15,8 @@ import {
   LogOut,
   Menu,
   X,
-  Scan
+  Scan,
+  UserCheck
 } from 'lucide-react';
 
 export const Layout = ({ children }) => {
@@ -31,6 +32,7 @@ export const Layout = ({ children }) => {
     { name: 'Contacts', href: '/contacts', icon: Users },
     { name: 'Badge Designer', href: '/badge-designer', icon: IdCard },
     { name: 'Scanner', href: '/scanner', icon: Scan },
+    { name: 'My Leads', href: '/my-leads', icon: UserCheck },
     { name: 'Orders', href: '/orders', icon: CreditCard },
     { name: 'Check-In', href: '/checkin', icon: QrCode },
     { name: 'Communications', href: '/communications', icon: Mail },
