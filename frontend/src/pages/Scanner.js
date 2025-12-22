@@ -81,7 +81,7 @@ export const Scanner = () => {
   };
 
   const onScanSuccess = async (decodedText) => {
-    console.log('QR Code scanned:', decodedText);
+    console.log('QR Code scanned - Raw data:', decodedText);
     
     // Extract contact ID from URL - handle multiple formats
     let contactId = null;
@@ -90,27 +90,34 @@ export const Scanner = () => {
     if (decodedText.includes('/contact/')) {
       // Format: https://eventpass-32.preview.emergentagent.com/contact/{contact_id}
       const parts = decodedText.split('/contact/');
-      contactId = parts[1].split('?')[0].split('#')[0]; // Remove query params or hash
-    } else if (decodedText.match(/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i)) {
-      // Direct UUID format
-      contactId = decodedText;
-    } else {
-      console.error('Invalid QR code format:', decodedText);
-      toast.error('Invalid QR code format. Please scan an EventPass contact QR code.');
+      const rawId = parts[1];
+      // Clean up: remove query params, hash, trailing slashes, whitespace
+      contactId = rawId.split('?')[0].split('#')[0].split('/')[0].trim();
+      console.log('Extracted contact ID from URL:', contactId);
+    } else if (decodedText.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i)) {
+      // Direct UUID format (anywhere in the string)
+      const match = decodedText.match(/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i);
+      contactId = match ? match[1] : null;
+      console.log('Extracted UUID:', contactId);
+    }
+    
+    if (!contactId) {
+      console.error('Could not extract contact ID from:', decodedText);
+      toast.error('Invalid QR code format. Scanned data: ' + decodedText.substring(0, 50));
       return;
     }
 
-    if (contactId) {
-      try {
-        // Fetch contact details
-        const response = await axios.get(`${API}/public/contact/${contactId}`);
-        setScannedContact(response.data);
-        stopScanning();
-        toast.success('Contact scanned successfully!');
-      } catch (error) {
-        console.error('Failed to fetch contact:', error);
-        toast.error('Contact not found. Please try again.');
-      }
+    console.log('Fetching contact with ID:', contactId);
+
+    try {
+      // Fetch contact details
+      const response = await axios.get(`${API}/public/contact/${contactId}`);
+      setScannedContact(response.data);
+      stopScanning();
+      toast.success('Contact scanned successfully!');
+    } catch (error) {
+      console.error('Failed to fetch contact:', error);
+      toast.error('Contact not found. ID: ' + contactId);
     }
   };
 
