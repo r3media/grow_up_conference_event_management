@@ -430,8 +430,12 @@ async def create_contact(contact: ContactCreate, current_user: dict = Depends(ge
         raise HTTPException(status_code=404, detail="Event not found")
     
     contact_id = str(uuid.uuid4())
-    qr_data = f"{contact_id}:{contact.name}:{contact.email}"
-    qr_code = generate_qr_code(qr_data)
+    
+    # Get the base URL from environment or construct it
+    # For QR code, we'll use the public contact view URL
+    base_url = os.getenv('FRONTEND_URL', 'https://eventpass-32.preview.emergentagent.com')
+    qr_url = f"{base_url}/contact/{contact_id}"
+    qr_code = generate_qr_code(qr_url)
     
     contact_doc = {
         "contact_id": contact_id,
