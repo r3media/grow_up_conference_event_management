@@ -17,11 +17,35 @@ export const Scanner = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Add custom styling for the scanner
+    const style = document.createElement('style');
+    style.innerHTML = `
+      #qr-reader {
+        border: none !important;
+      }
+      #qr-reader__dashboard_section {
+        display: none !important;
+      }
+      #qr-reader__camera_selection {
+        margin-bottom: 20px !important;
+      }
+      #qr-reader video {
+        border-radius: 12px !important;
+        max-width: 100% !important;
+        height: auto !important;
+      }
+      #qr-reader__scan_region {
+        max-width: 100% !important;
+      }
+    `;
+    document.head.appendChild(style);
+
     return () => {
       // Cleanup scanner on unmount
       if (scannerRef.current) {
         scannerRef.current.clear().catch(console.error);
       }
+      document.head.removeChild(style);
     };
   }, []);
 
