@@ -173,164 +173,188 @@ export const Scanner = () => {
   };
 
   return (
-    <Layout>
-      <div data-testid="scanner-container" className="max-w-4xl mx-auto space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold text-slate-900">QR Code Scanner</h2>
-          <p className="text-slate-600 mt-1">Scan attendee badges to view contact details</p>
-        </div>
-
-        {!scanning && !scannedContact && (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-            <div className="w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Camera className="text-indigo-600" size={48} />
+    <>
+      {scanning ? (
+        // Full-screen scanner mode
+        <div className="fixed inset-0 bg-slate-900 z-50 flex flex-col">
+          {/* Header */}
+          <div className="bg-slate-800 px-4 py-4 flex items-center justify-between border-b border-slate-700">
+            <div className="flex items-center space-x-3">
+              <Camera className="text-white" size={24} />
+              <div>
+                <h3 className="text-white font-semibold">Scanning Mode</h3>
+                <p className="text-slate-300 text-xs">Position QR code in frame</p>
+              </div>
             </div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-3">Ready to Scan</h3>
-            <p className="text-slate-600 mb-8 max-w-md mx-auto">
-              Click the button below to activate your camera and scan QR codes from attendee badges or contact cards.
-            </p>
             <Button
-              onClick={startScanning}
-              data-testid="start-scanning-button"
+              onClick={stopScanning}
+              data-testid="stop-scanning-button"
+              variant="destructive"
               size="lg"
-              className="px-8"
             >
-              <Camera size={20} className="mr-2" />
-              Start Scanning
+              <X size={20} className="mr-2" />
+              Exit
             </Button>
           </div>
-        )}
 
-        {scanning && (
-          <div className="bg-white rounded-xl border border-slate-200 p-8">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-xl font-semibold text-slate-900">Camera Active</h3>
-                <p className="text-sm text-slate-600 mt-1">Position the QR code within the camera view</p>
-              </div>
-              <Button
-                onClick={stopScanning}
-                data-testid="stop-scanning-button"
-                variant="destructive"
-                size="lg"
-              >
-                <X size={20} className="mr-2" />
-                Stop Scanning
-              </Button>
+          {/* Scanner */}
+          <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
+            <div className="w-full max-w-2xl">
+              <div id="qr-reader" className="w-full rounded-xl overflow-hidden shadow-2xl"></div>
             </div>
-            <div id="qr-reader" className="w-full rounded-lg overflow-hidden"></div>
-            <div className="mt-6 bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-              <div className="flex items-start space-x-3">
-                <Camera className="text-indigo-600 flex-shrink-0 mt-0.5" size={20} />
-                <div className="text-sm text-indigo-900">
-                  <p className="font-semibold mb-1">Scanning Tips:</p>
-                  <ul className="list-disc list-inside space-y-1 text-indigo-700">
-                    <li>Hold your device steady and ensure good lighting</li>
-                    <li>Position the QR code within the highlighted square</li>
-                    <li>Contact information will appear automatically when scanned</li>
+          </div>
+
+          {/* Tips */}
+          <div className="bg-slate-800 px-6 py-4 border-t border-slate-700">
+            <div className="max-w-2xl mx-auto">
+              <div className="flex items-start space-x-3 text-slate-300 text-sm">
+                <Camera className="text-indigo-400 flex-shrink-0 mt-0.5" size={18} />
+                <div>
+                  <p className="font-medium text-white mb-1">Scanning Tips:</p>
+                  <ul className="space-y-1 text-slate-400 text-xs">
+                    <li>• Hold steady and ensure good lighting</li>
+                    <li>• Center the QR code in the scanning area</li>
+                    <li>• Contact will be saved automatically when detected</li>
                   </ul>
                 </div>
               </div>
             </div>
           </div>
-        )}
-
-        {scannedContact && (
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-emerald-500 to-green-600 p-6 text-white">
-              <div className="flex items-center justify-center mb-3">
-                <CheckCircle size={48} />
-              </div>
-              <h3 className="text-2xl font-bold text-center">Contact Scanned!</h3>
-            </div>
-
-            <div className="p-8">
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex-1">
-                  <h4 className="text-2xl font-bold text-slate-900 mb-1">{scannedContact.name}</h4>
-                  {scannedContact.title && (
-                    <p className="text-lg text-slate-600">{scannedContact.title}</p>
-                  )}
+        </div>
+      ) : scannedContact ? (
+        // Scanned result (full-screen)
+        <div className="fixed inset-0 bg-gradient-to-br from-emerald-500 to-green-600 z-50 overflow-auto">
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="w-full max-w-2xl">
+              <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div className="bg-gradient-to-r from-emerald-500 to-green-600 p-8 text-white">
+                  <div className="flex items-center justify-center mb-4">
+                    <CheckCircle size={64} />
+                  </div>
+                  <h3 className="text-3xl font-bold text-center">Contact Scanned!</h3>
+                  <p className="text-center text-emerald-100 mt-2">Saved to your leads</p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${getTypeColor(scannedContact.type)}`}>
-                  {scannedContact.type.charAt(0).toUpperCase() + scannedContact.type.slice(1)}
-                </span>
-              </div>
 
-              <div className="space-y-4 mb-8">
-                {scannedContact.company && (
-                  <div className="flex items-start space-x-3">
-                    <Building2 className="text-slate-400 flex-shrink-0 mt-1" size={20} />
-                    <div>
-                      <p className="text-sm text-slate-600">Company</p>
-                      <p className="text-base font-semibold text-slate-900">{scannedContact.company}</p>
+                <div className="p-8">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex-1">
+                      <h4 className="text-2xl font-bold text-slate-900 mb-1">{scannedContact.name}</h4>
+                      {scannedContact.title && (
+                        <p className="text-lg text-slate-600">{scannedContact.title}</p>
+                      )}
                     </div>
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${getTypeColor(scannedContact.type)}`}>
+                      {scannedContact.type.charAt(0).toUpperCase() + scannedContact.type.slice(1)}
+                    </span>
                   </div>
-                )}
 
-                {scannedContact.email && (
-                  <div className="flex items-start space-x-3">
-                    <Mail className="text-slate-400 flex-shrink-0 mt-1" size={20} />
-                    <div>
-                      <p className="text-sm text-slate-600">Email</p>
-                      <a 
-                        href={`mailto:${scannedContact.email}`}
-                        className="text-base font-semibold text-indigo-600 hover:text-indigo-700"
-                      >
-                        {scannedContact.email}
-                      </a>
-                    </div>
+                  <div className="space-y-4 mb-8">
+                    {scannedContact.company && (
+                      <div className="flex items-start space-x-3">
+                        <Building2 className="text-slate-400 flex-shrink-0 mt-1" size={20} />
+                        <div>
+                          <p className="text-sm text-slate-600">Company</p>
+                          <p className="text-base font-semibold text-slate-900">{scannedContact.company}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {scannedContact.email && (
+                      <div className="flex items-start space-x-3">
+                        <Mail className="text-slate-400 flex-shrink-0 mt-1" size={20} />
+                        <div>
+                          <p className="text-sm text-slate-600">Email</p>
+                          <a 
+                            href={`mailto:${scannedContact.email}`}
+                            className="text-base font-semibold text-indigo-600 hover:text-indigo-700 break-all"
+                          >
+                            {scannedContact.email}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    {scannedContact.phone && (
+                      <div className="flex items-start space-x-3">
+                        <Phone className="text-slate-400 flex-shrink-0 mt-1" size={20} />
+                        <div>
+                          <p className="text-sm text-slate-600">Phone</p>
+                          <a 
+                            href={`tel:${scannedContact.phone}`}
+                            className="text-base font-semibold text-indigo-600 hover:text-indigo-700"
+                          >
+                            {scannedContact.phone}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    {scannedContact.booth_number && (
+                      <div className="flex items-start space-x-3">
+                        <User className="text-slate-400 flex-shrink-0 mt-1" size={20} />
+                        <div>
+                          <p className="text-sm text-slate-600">Booth Number</p>
+                          <p className="text-base font-semibold text-slate-900">{scannedContact.booth_number}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
 
-                {scannedContact.phone && (
-                  <div className="flex items-start space-x-3">
-                    <Phone className="text-slate-400 flex-shrink-0 mt-1" size={20} />
-                    <div>
-                      <p className="text-sm text-slate-600">Phone</p>
-                      <a 
-                        href={`tel:${scannedContact.phone}`}
-                        className="text-base font-semibold text-indigo-600 hover:text-indigo-700"
-                      >
-                        {scannedContact.phone}
-                      </a>
-                    </div>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button
+                      onClick={resetScanner}
+                      data-testid="scan-another-button"
+                      className="flex-1"
+                      size="lg"
+                    >
+                      <Camera size={20} className="mr-2" />
+                      Scan Another
+                    </Button>
+                    <Button
+                      onClick={() => { setScannedContact(null); navigate('/my-leads'); }}
+                      data-testid="view-all-leads-button"
+                      variant="secondary"
+                      className="flex-1"
+                      size="lg"
+                    >
+                      View All Leads
+                    </Button>
                   </div>
-                )}
-
-                {scannedContact.booth_number && (
-                  <div className="flex items-start space-x-3">
-                    <User className="text-slate-400 flex-shrink-0 mt-1" size={20} />
-                    <div>
-                      <p className="text-sm text-slate-600">Booth Number</p>
-                      <p className="text-base font-semibold text-slate-900">{scannedContact.booth_number}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex space-x-4">
-                <Button
-                  onClick={viewFullProfile}
-                  data-testid="view-full-profile-button"
-                  className="flex-1"
-                >
-                  View Full Profile
-                </Button>
-                <Button
-                  onClick={resetScanner}
-                  data-testid="scan-another-button"
-                  variant="secondary"
-                  className="flex-1"
-                >
-                  <Camera size={18} className="mr-2" />
-                  Scan Another
-                </Button>
+                </div>
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </Layout>
+        </div>
+      ) : (
+        // Normal layout with start button
+        <Layout>
+          <div data-testid="scanner-container" className="max-w-4xl mx-auto space-y-6">
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900">QR Code Scanner</h2>
+              <p className="text-slate-600 mt-1">Scan attendee badges to view contact details</p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+              <div className="w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Camera className="text-indigo-600" size={48} />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-3">Ready to Scan</h3>
+              <p className="text-slate-600 mb-8 max-w-md mx-auto">
+                Tap the button below to open full-screen camera and scan QR codes from attendee badges or contact cards.
+              </p>
+              <Button
+                onClick={startScanning}
+                data-testid="start-scanning-button"
+                size="lg"
+                className="px-8"
+              >
+                <Camera size={20} className="mr-2" />
+                Start Full-Screen Scanning
+              </Button>
+            </div>
+          </div>
+        </Layout>
+      )}
+    </>
   );
 };
