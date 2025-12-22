@@ -22,20 +22,37 @@ export const Scanner = () => {
     style.innerHTML = `
       #qr-reader {
         border: none !important;
+        width: 100% !important;
       }
       #qr-reader__dashboard_section {
         display: none !important;
       }
       #qr-reader__camera_selection {
         margin-bottom: 20px !important;
+        padding: 12px !important;
+        background: rgba(0,0,0,0.5) !important;
+        border-radius: 8px !important;
+      }
+      #qr-reader__camera_selection label {
+        color: white !important;
+      }
+      #qr-reader__camera_selection select {
+        background: white !important;
+        padding: 8px !important;
+        border-radius: 6px !important;
       }
       #qr-reader video {
         border-radius: 12px !important;
         max-width: 100% !important;
         height: auto !important;
+        min-height: 400px !important;
       }
       #qr-reader__scan_region {
         max-width: 100% !important;
+        min-height: 400px !important;
+      }
+      #qr-reader__scan_region img {
+        opacity: 0.6 !important;
       }
     `;
     document.head.appendChild(style);
