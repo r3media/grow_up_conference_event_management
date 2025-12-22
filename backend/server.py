@@ -518,6 +518,17 @@ async def delete_contact(contact_id: str, current_user: dict = Depends(get_curre
         raise HTTPException(status_code=404, detail="Contact not found")
     return {"message": "Contact deleted successfully"}
 
+# ===== PUBLIC CONTACT VIEW (No Auth Required) =====
+
+@api_router.get("/public/contact/{contact_id}", response_model=ContactResponse)
+async def get_public_contact(contact_id: str):
+    """Public endpoint for viewing contact details via QR code"""
+    contact = await db.contacts.find_one({"contact_id": contact_id}, {"_id": 0})
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    contact["created_at"] = datetime.fromisoformat(contact["created_at"])
+    return ContactResponse(**contact)
+
 # ===== BADGE TEMPLATES =====
 
 @api_router.post("/badge-templates", response_model=BadgeTemplateResponse)
