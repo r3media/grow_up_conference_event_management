@@ -13,6 +13,7 @@ import { CheckIn } from './pages/CheckIn';
 import { Communications } from './pages/Communications';
 import { Reports } from './pages/Reports';
 import { Tickets } from './pages/Tickets';
+import { ContactView } from './pages/ContactView';
 import '@/App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -41,6 +42,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/contact/:contactId" element={<ContactView />} />
           <Route
             path="/dashboard"
             element={
