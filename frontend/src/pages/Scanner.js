@@ -81,7 +81,11 @@ export const Scanner = () => {
   };
 
   const onScanSuccess = async (decodedText) => {
-    console.log('QR Code scanned - Raw data:', decodedText);
+    console.log('=== QR CODE SCAN DEBUG ===');
+    console.log('Raw scanned data:', decodedText);
+    console.log('Data length:', decodedText.length);
+    console.log('First 100 chars:', decodedText.substring(0, 100));
+    console.log('========================');
     
     // Extract contact ID from URL - handle multiple formats
     let contactId = null;
@@ -93,31 +97,34 @@ export const Scanner = () => {
       const rawId = parts[1];
       // Clean up: remove query params, hash, trailing slashes, whitespace
       contactId = rawId.split('?')[0].split('#')[0].split('/')[0].trim();
-      console.log('Extracted contact ID from URL:', contactId);
+      console.log('✓ Extracted contact ID from URL:', contactId);
     } else if (decodedText.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i)) {
       // Direct UUID format (anywhere in the string)
       const match = decodedText.match(/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i);
       contactId = match ? match[1] : null;
-      console.log('Extracted UUID:', contactId);
+      console.log('✓ Extracted UUID:', contactId);
     }
     
     if (!contactId) {
-      console.error('Could not extract contact ID from:', decodedText);
-      toast.error('Invalid QR code format. Scanned data: ' + decodedText.substring(0, 50));
+      console.error('✗ Could not extract contact ID');
+      // Show first 200 characters in the error for debugging
+      const preview = decodedText.length > 200 ? decodedText.substring(0, 200) + '...' : decodedText;
+      toast.error(`Unable to parse QR code. Data: ${preview}`);
       return;
     }
 
-    console.log('Fetching contact with ID:', contactId);
+    console.log('→ Fetching contact with ID:', contactId);
 
     try {
       // Fetch contact details
       const response = await axios.get(`${API}/public/contact/${contactId}`);
+      console.log('✓ Contact found:', response.data.name);
       setScannedContact(response.data);
       stopScanning();
       toast.success('Contact scanned successfully!');
     } catch (error) {
-      console.error('Failed to fetch contact:', error);
-      toast.error('Contact not found. ID: ' + contactId);
+      console.error('✗ Failed to fetch contact:', error);
+      toast.error(`Contact not found with ID: ${contactId}`);
     }
   };
 
