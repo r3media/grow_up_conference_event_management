@@ -13,7 +13,7 @@ const API = `${BACKEND_URL}/api`;
 export const MyLeads = () => {
   const [leads, setLeads] = useState([]);
   const [events, setEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState('');
+  const [selectedEvent, setSelectedEvent] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +37,7 @@ export const MyLeads = () => {
 
   const fetchLeads = async () => {
     try {
-      const url = selectedEvent ? `${API}/leads?event_id=${selectedEvent}` : `${API}/leads`;
+      const url = selectedEvent && selectedEvent !== 'all' ? `${API}/leads?event_id=${selectedEvent}` : `${API}/leads`;
       const response = await axios.get(url);
       setLeads(response.data);
     } catch (error) {
@@ -50,7 +50,7 @@ export const MyLeads = () => {
 
   const handleExport = async () => {
     try {
-      const url = selectedEvent ? `${API}/leads/export?event_id=${selectedEvent}` : `${API}/leads/export`;
+      const url = selectedEvent && selectedEvent !== 'all' ? `${API}/leads/export?event_id=${selectedEvent}` : `${API}/leads/export`;
       const response = await axios.get(url, {
         responseType: 'blob'
       });
@@ -113,12 +113,12 @@ export const MyLeads = () => {
           </div>
           <div className="flex items-center space-x-4">
             <div className="w-64">
-              <Select value={selectedEvent || ""} onValueChange={setSelectedEvent}>
+              <Select value={selectedEvent} onValueChange={setSelectedEvent}>
                 <SelectTrigger data-testid="event-filter-select">
                   <SelectValue placeholder="All Events" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Events</SelectItem>
+                  <SelectItem value="all">All Events</SelectItem>
                   {events.map(event => (
                     <SelectItem key={event.event_id} value={event.event_id}>
                       {event.name}
