@@ -14,6 +14,7 @@ import { Communications } from './pages/Communications';
 import { Reports } from './pages/Reports';
 import { Tickets } from './pages/Tickets';
 import { ContactView } from './pages/ContactView';
+import { Scanner } from './pages/Scanner';
 import '@/App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -120,6 +121,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Tickets />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/scanner"
+            element={
+              <ProtectedRoute>
+                <Scanner />
               </ProtectedRoute>
             }
           />
